@@ -3,7 +3,7 @@
 라즈베리파이 기반 스마트홈 시스템의 React 웹 대시보드.  
 에어컨 IR 제어, 실시간 온습도 확인, CCTV 스트리밍, 시스템 모니터링을 제공한다.
 
-백엔드: [smart-home-web-server](../smart-home-web-server) (Flask, 라즈베리파이 2)
+백엔드: [smart-home-web-server](https://github.com/dngur521/smart-home-web-server) (Flask, 라즈베리파이 2)
 
 ---
 
@@ -48,10 +48,10 @@ npm run build
 cp .env.example .env
 ```
 
-| 변수 | 설명 | 기본값 |
-|---|---|---|
-| `VITE_API_TARGET` | 백엔드 서버 주소 (개발 시 프록시 대상) | `http://localhost:5000` |
-| `VITE_CCTV_STREAM_URL` | Nginx로 프록시된 MJPEG 스트림 경로 | `/cctv-stream/` |
+| 변수                   | 설명                                   | 기본값                  |
+| ---------------------- | -------------------------------------- | ----------------------- |
+| `VITE_API_TARGET`      | 백엔드 서버 주소 (개발 시 프록시 대상) | `http://localhost:5000` |
+| `VITE_CCTV_STREAM_URL` | Nginx로 프록시된 MJPEG 스트림 경로     | `/cctv-stream/`         |
 
 > `.env`는 `.gitignore`에 포함되어 있으므로 커밋되지 않는다.
 
@@ -59,19 +59,19 @@ cp .env.example .env
 
 ## 페이지 구성
 
-| 경로 | 페이지 | 인증 필요 |
-|---|---|---|
-| `/` | 홈 | ✗ |
-| `/auth/login` | 로그인 | ✗ |
-| `/auth/register` | 회원가입 | ✗ |
-| `/aircon/control` | 에어컨 제어 | ✓ |
-| `/aircon/history` | 에어컨 제어 기록 | ✓ |
-| `/temp/check` | 실시간 온습도 | ✓ |
-| `/temp/history` | 온습도 기록 | ✓ |
-| `/cctv` | CCTV 스트리밍 | ✓ |
-| `/system` | 시스템 모니터링 | ✓ |
-| `/console` | 시스템 콘솔 (ttyd) | ✓ |
-| `/user/profile` | 프로필 / 비밀번호 변경 | ✓ |
+| 경로              | 페이지                 | 인증 필요 |
+| ----------------- | ---------------------- | --------- |
+| `/`               | 홈                     | ✗         |
+| `/auth/login`     | 로그인                 | ✗         |
+| `/auth/register`  | 회원가입               | ✗         |
+| `/aircon/control` | 에어컨 제어            | ✓         |
+| `/aircon/history` | 에어컨 제어 기록       | ✓         |
+| `/temp/check`     | 실시간 온습도          | ✓         |
+| `/temp/history`   | 온습도 기록            | ✓         |
+| `/cctv`           | CCTV 스트리밍          | ✓         |
+| `/system`         | 시스템 모니터링        | ✓         |
+| `/console`        | 시스템 콘솔 (ttyd)     | ✓         |
+| `/user/profile`   | 프로필 / 비밀번호 변경 | ✓         |
 
 ---
 
