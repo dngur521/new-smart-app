@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
   Box,
+  Button,
   Paper,
   Table,
   TableBody,
@@ -15,7 +16,8 @@ import {
   Chip,
   TextField,
 } from '@mui/material';
-import { useAirHistory } from '../hooks/useApi';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+import { useAirHistory, useSeekPage } from '../hooks/useApi';
 import { getCommandDescription } from '../utils/commandUtils';
 import dayjs from 'dayjs';
 
@@ -23,8 +25,10 @@ export default function AirHistoryPage() {
   const [page, setPage] = useState(0); // MUI는 0-based, API는 1-based
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [goToInput, setGoToInput] = useState('');
+  const [seekDate, setSeekDate] = useState(null);
 
   const { data, isLoading, isError, error } = useAirHistory(page + 1, rowsPerPage);
+  const { mutate: seekPage, isPending: isSeekPending } = useSeekPage('/arduino/aircon-history/seek');
 
   const totalPages = Math.ceil((data?.total || 0) / rowsPerPage);
 
@@ -44,6 +48,14 @@ export default function AirHistoryPage() {
       setPage(target - 1);
     }
     setGoToInput('');
+  };
+
+  const handleSeekPage = () => {
+    if (!seekDate) return;
+    seekPage(
+      { timestamp: seekDate.toISOString(), limit: rowsPerPage },
+      { onSuccess: (res) => setPage(res.page - 1) }
+    );
   };
 
   return (
@@ -84,33 +96,54 @@ export default function AirHistoryPage() {
                 </TableBody>
               </Table>
             </TableContainer>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, pl: 2 }}>
-                <Typography variant="body2" color="text.secondary">
-                  몇 페이지로 이동:
+            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 2, pt: 1.5, pb: 0.5 }}>
+                <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: 'nowrap' }}>
+                  날짜/시간으로 이동:
                 </Typography>
-                <TextField
+                <DateTimePicker
+                  value={seekDate}
+                  onChange={setSeekDate}
+                  slotProps={{ textField: { size: 'small' } }}
+                />
+                <Button
+                  variant="outlined"
                   size="small"
-                  type="number"
-                  value={goToInput}
-                  onChange={(e) => setGoToInput(e.target.value)}
-                  onKeyDown={handleGoToPage}
-                  placeholder={`1-${totalPages}`}
-                  sx={{ width: 80 }}
-                  inputProps={{ min: 1, max: totalPages }}
+                  onClick={handleSeekPage}
+                  disabled={!seekDate || isSeekPending}
+                  sx={{ whiteSpace: 'nowrap' }}
+                >
+                  {isSeekPending ? <CircularProgress size={16} color="inherit" /> : '이동'}
+                </Button>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, pl: 2 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    몇 페이지로 이동:
+                  </Typography>
+                  <TextField
+                    size="small"
+                    type="number"
+                    value={goToInput}
+                    onChange={(e) => setGoToInput(e.target.value)}
+                    onKeyDown={handleGoToPage}
+                    placeholder={`1-${totalPages}`}
+                    sx={{ width: 80 }}
+                    inputProps={{ min: 1, max: totalPages }}
+                  />
+                </Box>
+                <TablePagination
+                  rowsPerPageOptions={[5, 10, 25]}
+                  component="div"
+                  count={data.total || 0}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                  labelRowsPerPage="페이지 당 행:"
+                  labelDisplayedRows={({ from, to, count }) => `${count}개 중 ${from}-${to}`}
                 />
               </Box>
-              <TablePagination
-                rowsPerPageOptions={[5, 10, 25]}
-                component="div"
-                count={data.total || 0}
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-                labelRowsPerPage="페이지 당 행:"
-                labelDisplayedRows={({ from, to, count }) => `${count}개 중 ${from}-${to}`}
-              />
             </Box>
           </>
         )}

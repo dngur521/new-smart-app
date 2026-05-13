@@ -120,6 +120,17 @@ export const useDeleteUser = () => {
     });
 };
 
+export const useSeekPage = (endpoint) => {
+    const { authApi } = useAuth();
+    return useMutation({
+        mutationFn: async ({ timestamp, limit }) => {
+            const res = await authApi.get(endpoint, { params: { timestamp, limit } });
+            if (res.data.status !== 'success') throw new Error(res.data.message || 'Failed to seek page');
+            return res.data;
+        },
+    });
+};
+
 const fetchSystemStats = async (authApi) => {
     const res = await authApi.get('/system/stats');
     if (res.status !== 200) throw new Error('Network response was not ok');
