@@ -23,21 +23,14 @@ import SendIcon from '@mui/icons-material/Send';
 import { useSendCommand } from '../hooks/useApi';
 import { getCommandIndex } from '../utils/commandUtils';
 
-/**
- * 에어컨 제어 페이지 (기존 AirControl.jsx 대체)
- * MUI 컴포넌트와 React Query (useSendCommand) 훅을 사용합니다.
- */
 export default function AirControlPage() {
   const [type, setType] = useState('cooling');
   const [temp, setTemp] = useState(18);
   const [wind, setWind] = useState('약풍');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
 
-  // React Query의 useMutation 훅 사용
-  const { mutate: sendCommand, isPending, isError, isSuccess, data: response, error } = useSendCommand({
-    onSuccess: () => {
-      setSnackbarOpen(true); // 성공 시 스낵바 표시
-    },
+  const { mutate: sendCommand, isPending, isError, error } = useSendCommand({
+    onSuccess: () => setSnackbarOpen(true),
   });
 
   const handleCommand = (commandType) => {
@@ -54,7 +47,7 @@ export default function AirControlPage() {
       if (codeIndex !== null) {
         commandToSend = `SEND ${codeIndex},5`;
       } else {
-        // 이 경우는 UI상 발생하기 어려움
+        // UI상 발생하기 어려운 케이스 (선택 가능한 조합이 모두 codes에 정의되어 있음)
         alert('유효하지 않은 명령어 조합입니다.');
         return;
       }
@@ -71,35 +64,19 @@ export default function AirControlPage() {
         에어컨 제어
       </Typography>
       <Grid container spacing={3}>
-        {/* 단축 명령어 카드 */}
+        {/* 단축 명령어 */}
         <Grid item xs={12} md={6}>
           <Card>
             <CardHeader title="단축 명령어" />
             <CardContent>
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                <Button
-                  variant="contained"
-                  startIcon={<PowerIcon />}
-                  onClick={() => handleCommand('powerOn')}
-                  disabled={isPending}
-                >
+                <Button variant="contained" startIcon={<PowerIcon />} onClick={() => handleCommand('powerOn')} disabled={isPending}>
                   전원 ON
                 </Button>
-                <Button
-                  variant="contained"
-                  startIcon={<AcUnitIcon />}
-                  onClick={() => handleCommand('powerCooling')}
-                  disabled={isPending}
-                >
+                <Button variant="contained" startIcon={<AcUnitIcon />} onClick={() => handleCommand('powerCooling')} disabled={isPending}>
                   파워 냉방
                 </Button>
-                <Button
-                  variant="contained"
-                  color="error"
-                  startIcon={<PowerSettingsNewIcon />}
-                  onClick={() => handleCommand('powerOff')}
-                  disabled={isPending}
-                >
+                <Button variant="contained" color="error" startIcon={<PowerSettingsNewIcon />} onClick={() => handleCommand('powerOff')} disabled={isPending}>
                   전원 OFF
                 </Button>
               </Stack>
@@ -107,7 +84,7 @@ export default function AirControlPage() {
           </Card>
         </Grid>
 
-        {/* 상세 제어 카드 */}
+        {/* 상세 제어 */}
         <Grid item xs={12} md={6}>
           <Card>
             <CardHeader title="상세 제어" />
@@ -115,52 +92,25 @@ export default function AirControlPage() {
               <Stack spacing={3}>
                 <FormControl fullWidth>
                   <InputLabel id="type-select-label">종류</InputLabel>
-                  <Select
-                    labelId="type-select-label"
-                    value={type}
-                    label="종류"
-                    onChange={(e) => setType(e.target.value)}
-                  >
+                  <Select labelId="type-select-label" value={type} label="종류" onChange={(e) => setType(e.target.value)}>
                     <MenuItem value="cooling">냉방</MenuItem>
                     <MenuItem value="dehumidification">제습</MenuItem>
                   </Select>
                 </FormControl>
-
                 <FormControl fullWidth>
                   <InputLabel id="temp-select-label">온도</InputLabel>
-                  <Select
-                    labelId="temp-select-label"
-                    value={temp}
-                    label="온도"
-                    onChange={(e) => setTemp(e.target.value)}
-                  >
-                    {temps.map((t) => (
-                      <MenuItem key={t} value={t}>
-                        {t}℃
-                      </MenuItem>
-                    ))}
+                  <Select labelId="temp-select-label" value={temp} label="온도" onChange={(e) => setTemp(e.target.value)}>
+                    {temps.map((t) => <MenuItem key={t} value={t}>{t}℃</MenuItem>)}
                   </Select>
                 </FormControl>
-
                 <FormControl fullWidth>
                   <InputLabel id="wind-select-label">바람 세기</InputLabel>
-                  <Select
-                    labelId="wind-select-label"
-                    value={wind}
-                    label="바람 세기"
-                    onChange={(e) => setWind(e.target.value)}
-                  >
-                    {winds.map((w) => (
-                      <MenuItem key={w} value={w}>
-                        {w}
-                      </MenuItem>
-                    ))}
+                  <Select labelId="wind-select-label" value={wind} label="바람 세기" onChange={(e) => setWind(e.target.value)}>
+                    {winds.map((w) => <MenuItem key={w} value={w}>{w}</MenuItem>)}
                   </Select>
                 </FormControl>
-
                 <Button
                   variant="contained"
-                  color="primary"
                   onClick={() => handleCommand('custom')}
                   disabled={isPending}
                   startIcon={isPending ? <CircularProgress size={20} color="inherit" /> : <SendIcon />}
@@ -172,17 +122,11 @@ export default function AirControlPage() {
           </Card>
         </Grid>
 
-        {/* API 응답 영역 */}
         <Grid item xs={12}>
-          {isError && (
-            <Alert severity="error" sx={{ mt: 2 }}>
-              오류: {error.message}
-            </Alert>
-          )}
+          {isError && <Alert severity="error">오류: {error.message}</Alert>}
         </Grid>
       </Grid>
 
-      {/* 성공 스낵바 */}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={4000}

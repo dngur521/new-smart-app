@@ -1,7 +1,5 @@
-/**
- * 명령어 코드에 대한 설명을 정의한 배열
- * (기존 AirHistList.jsx에서 가져옴)
- */
+// 아두이노로 전송하는 명령어 코드(index)와 사람이 읽을 수 있는 설명의 매핑 배열
+// index 0 = 'SEND 0,5', index 1 = 'SEND 1,5', ... 순서 변경 금지
 export const commandDescriptions = [
     '전원 OFF',
     '전원 ON 및 냉방. 약풍, 18도',
@@ -109,13 +107,9 @@ export const commandDescriptions = [
     '제습. 자동풍, 27도',
     '제습. 자동풍, 28도',
     '제습. 자동풍, 29도',
-    '제습. 자동풍, 30도', // 106번
+    '제습. 자동풍, 30도',
 ];
 
-/**
- * 명령어 코드 매핑
- * (기존 AirControl.jsx에서 가져옴)
- */
 const codes = [
     { type: 'power', code: '0' },
     { type: 'powerOn', code: '1' },
@@ -226,17 +220,13 @@ const codes = [
     { type: 'dehumidification', wind: '자동풍', temp: 30, code: '106' },
 ];
 
-/**
- * 조합에 맞는 명령어 코드를 찾습니다.
- */
+// (type, temp, wind) 조합으로 아두이노 명령어 코드를 반환
 export const getCommandIndex = (type, temp, wind) => {
-    const foundCode = codes.find((c) => c.type === type && c.temp === temp && c.wind === wind);
-    return foundCode ? foundCode.code : null;
+    const found = codes.find((c) => c.type === type && c.temp === temp && c.wind === wind);
+    return found ? found.code : null;
 };
 
-/**
- * 'SEND 3,5' 같은 명령어를 '냉방. 약풍, 18도'로 변환합니다.
- */
+// 'SEND 3,5' 형식의 명령어를 사람이 읽을 수 있는 설명으로 변환
 export const getCommandDescription = (command) => {
     const parts = command.split(' ');
     if (parts[0] === 'SEND' && parts.length > 1) {
@@ -245,5 +235,5 @@ export const getCommandDescription = (command) => {
             return commandDescriptions[index];
         }
     }
-    return command; // 형식이 맞지 않으면 원래 명령어를 반환
+    return command; // 파싱 실패 시 원본 반환
 };

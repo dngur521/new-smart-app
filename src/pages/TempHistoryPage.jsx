@@ -16,12 +16,8 @@ import {
 import { useTempHistory } from '../hooks/useApi';
 import dayjs from 'dayjs';
 
-/**
- * 온습도 기록 페이지
- * (기존 TempHistApp.jsx, TempHistList.jsx 대체)
- */
 export default function TempHistoryPage() {
-  const [page, setPage] = useState(0); // MUI Pagination은 0부터 시작
+  const [page, setPage] = useState(0); // MUI는 0-based, API는 1-based
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const { data, isLoading, isError, error } = useTempHistory(page + 1, rowsPerPage);
@@ -53,18 +49,10 @@ export default function TempHistoryPage() {
               <Table stickyHeader aria-label="temperature history table">
                 <TableHead>
                   <TableRow>
-                    <TableCell align="center" sx={{ fontWeight: 'bold' }}>
-                      #
-                    </TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 'bold' }}>
-                      온도 (°C)
-                    </TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 'bold' }}>
-                      습도 (%)
-                    </TableCell>
-                    <TableCell align="right" sx={{ fontWeight: 'bold' }}>
-                      시간
-                    </TableCell>
+                    <TableCell align="center" sx={{ fontWeight: 'bold' }}>#</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 'bold' }}>온도 (°C)</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 'bold' }}>습도 (%)</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 'bold' }}>시간</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -74,9 +62,7 @@ export default function TempHistoryPage() {
                       <TableCell align="right" sx={{ color: 'primary.main', fontWeight: 'bold' }}>
                         {row.temperature}
                       </TableCell>
-                      <TableCell align="right" sx={{ color: 'info.main' }}>
-                        {row.humidity}
-                      </TableCell>
+                      <TableCell align="right" sx={{ color: 'info.main' }}>{row.humidity}</TableCell>
                       <TableCell align="right">{dayjs(row.timestamp).format('YY/MM/DD HH:mm')}</TableCell>
                     </TableRow>
                   ))}

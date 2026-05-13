@@ -4,10 +4,6 @@ import { useSensorData } from '../hooks/useApi';
 import DeviceThermostatIcon from '@mui/icons-material/DeviceThermostat';
 import WaterDropIcon from '@mui/icons-material/WaterDrop';
 
-/**
- * 실시간 온도/습도 확인 페이지 (기존 TempCheck.jsx 대체)
- * React Query의 useSensorData 훅을 사용하여 5초마다 자동 갱신합니다.
- */
 export default function TempCheckPage() {
   const { data, isLoading, isError, error, isFetching } = useSensorData();
 
@@ -45,18 +41,14 @@ export default function TempCheckPage() {
                       <Typography variant="h3" color="primary.main" sx={{ fontWeight: 700 }}>
                         {data.temperature}°C
                       </Typography>
-                      <Typography variant="overline" color="text.secondary">
-                        온도
-                      </Typography>
+                      <Typography variant="overline" color="text.secondary">온도</Typography>
                     </Box>
                     <Box sx={{ textAlign: 'center' }}>
                       <WaterDropIcon sx={{ fontSize: 40, color: 'info.main' }} />
                       <Typography variant="h3" color="info.main" sx={{ fontWeight: 700 }}>
                         {data.humidity}%
                       </Typography>
-                      <Typography variant="overline" color="text.secondary">
-                        습도
-                      </Typography>
+                      <Typography variant="overline" color="text.secondary">습도</Typography>
                     </Box>
                   </Stack>
                 </>

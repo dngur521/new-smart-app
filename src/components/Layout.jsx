@@ -15,11 +15,10 @@ import {
   useTheme,
   useMediaQuery,
   CssBaseline,
-  Button, // 1. Button 추가
-  CircularProgress, // 2. 로딩 스피너 추가
-  Stack, // 3. 스택 추가
+  Button,
+  CircularProgress,
+  Stack,
 } from '@mui/material';
-// 4. 아이콘 추가
 import MenuIcon from '@mui/icons-material/Menu';
 import HomeIcon from '@mui/icons-material/Home';
 import AcUnitIcon from '@mui/icons-material/AcUnit';
@@ -32,15 +31,13 @@ import PersonIcon from '@mui/icons-material/Person';
 import VideocamIcon from '@mui/icons-material/Videocam';
 import ComputerIcon from '@mui/icons-material/Computer';
 import TerminalIcon from '@mui/icons-material/Terminal';
-// ------------------------------------
 
-import { useAuth } from '../hooks/useAuth'; // 5. useAuth 훅 import
-import { useLogout } from '../hooks/useApi'; // 6. useLogout 훅 import
+import { useAuth } from '../hooks/useAuth';
+import { useLogout } from '../hooks/useApi';
 
+const drawerWidth = 240;
 
-const drawerWidth = 240; // 사이드바 너비
-
-// 메뉴 아이템 정의
+// requiresAuth: true인 항목은 비로그인 시 사이드바에서 숨김
 const menuItems = [
   { text: '홈', icon: <HomeIcon />, path: '/', requiresAuth: false },
   { text: '에어컨 제어', icon: <AcUnitIcon />, path: '/aircon/control', requiresAuth: true },
@@ -57,84 +54,67 @@ function Layout({ children }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const location = useLocation();
-  
-  // 7. 인증 훅 사용
   const { isAuthenticated, user, isLoading } = useAuth();
-  const { mutate: logout, isPending: isLoggingOut } = useLogout(); 
+  const { mutate: logout, isPending: isLoggingOut } = useLogout();
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
-  
-  // 로그아웃 핸들러
+
   const handleLogout = () => {
-    // 서버에 무효화 요청 후 클라이언트 토큰 삭제
     logout();
-    if (isMobile) {
-      handleDrawerToggle();
-    }
+    if (isMobile) handleDrawerToggle();
   };
 
-  // Drawer (사이드바)에 표시될 컨텐츠
   const drawerContent = (
     <div>
       <Toolbar />
       <Box sx={{ overflow: 'auto' }}>
         <List>
           {menuItems.map((item) => {
-            // 8. 로그인 상태에 따라 메뉴 표시 결정
-            if (item.requiresAuth && !isAuthenticated) {
-                return null;
-            }
+            if (item.requiresAuth && !isAuthenticated) return null;
             return (
-                <ListItem key={item.text} disablePadding>
+              <ListItem key={item.text} disablePadding>
                 <ListItemButton
-                    component={RouterLink}
-                    to={item.path}
-                    selected={location.pathname === item.path}
-                    onClick={isMobile ? handleDrawerToggle : undefined}
-                    sx={{
+                  component={RouterLink}
+                  to={item.path}
+                  selected={location.pathname === item.path}
+                  onClick={isMobile ? handleDrawerToggle : undefined}
+                  sx={{
                     borderRadius: '0 100px 100px 0',
                     marginRight: '10px',
                     '&.Mui-selected': {
-                        backgroundColor: 'primary.main',
-                        color: 'white',
-                        '& .MuiListItemIcon-root': {
-                        color: 'white',
-                        },
-                        '&:hover': {
-                        backgroundColor: 'primary.dark',
-                        },
+                      backgroundColor: 'primary.main',
+                      color: 'white',
+                      '& .MuiListItemIcon-root': { color: 'white' },
+                      '&:hover': { backgroundColor: 'primary.dark' },
                     },
-                    }}
+                  }}
                 >
-                    <ListItemIcon>{item.icon}</ListItemIcon>
-                    <ListItemText primary={item.text} />
+                  <ListItemIcon>{item.icon}</ListItemIcon>
+                  <ListItemText primary={item.text} />
                 </ListItemButton>
-                </ListItem>
+              </ListItem>
             );
           })}
 
-          {/* 9. 로그인/로그아웃 버튼 추가 */}
           <Box sx={{ px: 2, pt: 2 }}>
             {isLoading ? (
-                <Stack direction="row" spacing={1} alignItems="center" justifyContent="center">
-                    <CircularProgress size={20} />
-                    <Typography variant="caption">인증 확인 중...</Typography>
-                </Stack>
+              <Stack direction="row" spacing={1} alignItems="center" justifyContent="center">
+                <CircularProgress size={20} />
+                <Typography variant="caption">인증 확인 중...</Typography>
+              </Stack>
             ) : isAuthenticated ? (
               <Stack spacing={1}>
-                {/* 프로필 링크 */}
                 <ListItemButton
-                    component={RouterLink}
-                    to="/user/profile"
-                    selected={location.pathname === '/user/profile'}
-                    onClick={isMobile ? handleDrawerToggle : undefined}
+                  component={RouterLink}
+                  to="/user/profile"
+                  selected={location.pathname === '/user/profile'}
+                  onClick={isMobile ? handleDrawerToggle : undefined}
                 >
-                    <ListItemIcon><PersonIcon /></ListItemIcon>
-                    <ListItemText primary={`프로필 (${user?.username})`} />
+                  <ListItemIcon><PersonIcon /></ListItemIcon>
+                  <ListItemText primary={`프로필 (${user?.username})`} />
                 </ListItemButton>
-                {/* 로그아웃 버튼 */}
                 <Button
                   fullWidth
                   variant="contained"
@@ -187,113 +167,80 @@ function Layout({ children }) {
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
             Smart Home Dashboard
           </Typography>
-          {/* 10. 데스크탑 헤더에 로그인/사용자 정보 표시 */}
           {!isMobile && (
-              <Stack direction="row" spacing={2} alignItems="center">
-                  {isLoading ? (
-                      <CircularProgress color="inherit" size={24} />
-                  ) : isAuthenticated ? (
-                      <>
-                          <Typography variant="subtitle1">
-                              환영합니다, {user?.username}님!
-                          </Typography>
-                          <Button 
-                              color="inherit" 
-                              onClick={handleLogout} 
-                              disabled={isLoggingOut}
-                              startIcon={isLoggingOut ? <CircularProgress size={20} color="inherit" /> : <LogoutIcon />}
-                          >
-                            로그아웃
-                          </Button>
-                      </>
-                  ) : (
-                      <Button 
-                          color="inherit" 
-                          component={RouterLink} 
-                          to="/auth/login" 
-                          startIcon={<LoginIcon />}
-                      >
-                          로그인
-                      </Button>
-                  )}
-              </Stack>
+            <Stack direction="row" spacing={2} alignItems="center">
+              {isLoading ? (
+                <CircularProgress color="inherit" size={24} />
+              ) : isAuthenticated ? (
+                <>
+                  <Typography variant="subtitle1">
+                    환영합니다, {user?.username}님!
+                  </Typography>
+                  <Button
+                    color="inherit"
+                    onClick={handleLogout}
+                    disabled={isLoggingOut}
+                    startIcon={isLoggingOut ? <CircularProgress size={20} color="inherit" /> : <LogoutIcon />}
+                  >
+                    로그아웃
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  color="inherit"
+                  component={RouterLink}
+                  to="/auth/login"
+                  startIcon={<LoginIcon />}
+                >
+                  로그인
+                </Button>
+              )}
+            </Stack>
           )}
         </Toolbar>
       </AppBar>
 
-      {/* ... (기존 Drawer 코드) ... */}
-      
-      {/* Mobile Drawer (Temporary) */}
-        <Drawer
-          variant="temporary"
-          open={mobileOpen}
-          onClose={handleDrawerToggle}
-          ModalProps={{
-            keepMounted: true, // Better open performance on mobile.
-          }}
-          sx={{
-            display: { xs: 'block', md: 'none' },
-            '& .MuiDrawer-paper': {
-              boxSizing: 'border-box',
-              width: drawerWidth,
-              borderRight: 'none',
-            },
-          }}
-        >
-          {drawerContent}
-        </Drawer>
+      {/* 모바일: 오버레이 Drawer */}
+      <Drawer
+        variant="temporary"
+        open={mobileOpen}
+        onClose={handleDrawerToggle}
+        ModalProps={{ keepMounted: true }} // 마운트 유지로 모바일 열기 성능 개선
+        sx={{
+          display: { xs: 'block', md: 'none' },
+          '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth, borderRight: 'none' },
+        }}
+      >
+        {drawerContent}
+      </Drawer>
 
-        {/* Desktop Drawer (Permanent) */}
-        <Drawer
-          variant="permanent"
-          sx={{
-            display: { xs: 'none', md: 'block' },
-            '& .MuiDrawer-paper': {
-              boxSizing: 'border-box',
-              width: drawerWidth,
-              borderRight: 'none',
-              backgroundColor: '#fdfdfd',
-            },
-          }}
-          open
-        >
-          {drawerContent}
-        </Drawer>
+      {/* 데스크탑: 고정 Drawer */}
+      <Drawer
+        variant="permanent"
+        sx={{
+          display: { xs: 'none', md: 'block' },
+          '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth, borderRight: 'none', backgroundColor: '#fdfdfd' },
+        }}
+        open
+      >
+        {drawerContent}
+      </Drawer>
 
-
-      {/* 메인 컨텐츠 영역 */}
       <Box
         component="main"
         sx={{
           flexGrow: 1,
           p: 3,
-          // 1. 너비는 100%를 유지하거나, flexGrow: 1에 맡깁니다.
-          width: '100%', 
+          width: '100%',
           minHeight: '100vh',
           display: 'flex',
           flexDirection: 'column',
-          
-          // 2. 핵심 수정: 데스크탑(md) 이상에서 왼쪽 마진을 줍니다.
-          // 이 마진이 사이드바가 차지하는 공간입니다.
-          ml: { md: `${drawerWidth}px` }, 
-          
-          // 3. (선택적) AppBar가 차지하는 높이만큼 상단 패딩을 조정할 수도 있습니다.
-          // pt: { xs: 8, md: 10 } // 만약 Toolbar만으로 부족하다면
+          ml: { md: `${drawerWidth}px` }, // permanent Drawer는 content를 밀지 않으므로 직접 마진 지정
         }}
       >
         <Toolbar />
         <Box sx={{ flexGrow: 1 }}>{children}</Box>
-
-        {/* Footer */}
-        <Box
-          component="footer"
-          sx={{
-            textAlign: 'center',
-            py: 2,
-            mt: 4,
-            color: 'text.secondary',
-          }}
-        >
+        <Box component="footer" sx={{ textAlign: 'center', py: 2, mt: 4, color: 'text.secondary' }}>
           <Typography variant="body2">
             &copy; {new Date().getFullYear()} SmartApp. All rights reserved.
           </Typography>

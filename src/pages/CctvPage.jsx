@@ -7,10 +7,12 @@ export default function CctvPage() {
   const imgRef = useRef(null);
 
   useEffect(() => {
+    const img = imgRef.current; // 마운트 시점에 캡처 (cleanup 시점엔 null일 수 있음)
     return () => {
-      // 페이지 이탈 시 src를 비워 브라우저의 MJPEG 스트림 연결을 강제 종료
-      if (imgRef.current) {
-        imgRef.current.src = '';
+      if (img) {
+        // src=''은 현재 페이지 URL로 해석되어 새 요청이 발생함
+        // data URI로 즉시 교체해 MJPEG 스트림 연결을 강제 종료
+        img.src = 'data:,';
       }
     };
   }, []);
