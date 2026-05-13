@@ -6,7 +6,6 @@ import {
   CardContent,
   CardHeader,
   CircularProgress,
-  Divider,
   FormControl,
   InputLabel,
   MenuItem,
@@ -68,60 +67,91 @@ export default function AirControlPage() {
         에어컨 제어
       </Typography>
       <Grid container spacing={3}>
-        {/* 단축 명령어 */}
+        {/* 마지막 에어컨 제어 기록 */}
         <Grid item xs={12}>
           <Card>
+            <CardHeader
+              title="마지막 에어컨 제어 기록"
+              action={
+                <Button component={Link} to="/aircon/history" size="small" endIcon={<HistoryIcon />}>
+                  전체 보기
+                </Button>
+              }
+            />
+            <CardContent sx={{ pt: 0 }}>
+              {isHistoryLoading && (
+                <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
+                  <CircularProgress size={24} />
+                </Box>
+              )}
+              {!isHistoryLoading && recentHistory?.data?.length > 0 && (
+                <Box sx={{ display: 'flex', alignItems: 'center', py: 1.5, gap: 1 }}>
+                  <Typography variant="body2" sx={{ flexGrow: 1 }}>
+                    {getCommandDescription(recentHistory.data[0].command)}
+                  </Typography>
+                  <Chip label={recentHistory.data[0].response || 'N/A'} size="small" sx={{ flexShrink: 0 }} />
+                  <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap', flexShrink: 0 }}>
+                    {dayjs(recentHistory.data[0].timestamp).format('MM/DD HH:mm')}
+                  </Typography>
+                </Box>
+              )}
+              {!isHistoryLoading && !recentHistory?.data?.length && (
+                <Typography variant="body2" color="text.secondary" sx={{ py: 2, textAlign: 'center' }}>
+                  기록 없음
+                </Typography>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* 단축 명령어 */}
+        <Grid item xs={12} md={5}>
+          <Card sx={{ height: '100%' }}>
             <CardHeader title="단축 명령어" />
             <CardContent sx={{ pt: 1 }}>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={4}>
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    size="large"
-                    startIcon={<PowerIcon />}
-                    onClick={() => handleCommand('powerOn')}
-                    disabled={isPending}
-                    sx={{ py: 1.5 }}
-                  >
-                    전원 ON
-                  </Button>
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    color="info"
-                    size="large"
-                    startIcon={<AcUnitIcon />}
-                    onClick={() => handleCommand('powerCooling')}
-                    disabled={isPending}
-                    sx={{ py: 1.5 }}
-                  >
-                    파워 냉방
-                  </Button>
-                </Grid>
-                <Grid item xs={12} sm={4}>
-                  <Button
-                    fullWidth
-                    variant="contained"
-                    color="error"
-                    size="large"
-                    startIcon={<PowerSettingsNewIcon />}
-                    onClick={() => handleCommand('powerOff')}
-                    disabled={isPending}
-                    sx={{ py: 1.5 }}
-                  >
-                    전원 OFF
-                  </Button>
-                </Grid>
-              </Grid>
+              <Stack spacing={2}>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  size="large"
+                  startIcon={<PowerIcon />}
+                  onClick={() => handleCommand('powerOn')}
+                  disabled={isPending}
+                  sx={{ py: 1.5 }}
+                >
+                  전원 ON
+                </Button>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  color="info"
+                  size="large"
+                  startIcon={<AcUnitIcon />}
+                  onClick={() => handleCommand('powerCooling')}
+                  disabled={isPending}
+                  sx={{ py: 1.5 }}
+                >
+                  파워 냉방
+                </Button>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  color="error"
+                  size="large"
+                  startIcon={<PowerSettingsNewIcon />}
+                  onClick={() => handleCommand('powerOff')}
+                  disabled={isPending}
+                  sx={{ py: 1.5 }}
+                >
+                  전원 OFF
+                </Button>
+              </Stack>
             </CardContent>
           </Card>
         </Grid>
 
         {/* 상세 제어 */}
-        <Grid item xs={12} md={5}>
+        <Grid item xs={12} md={7}>
           <Card sx={{ height: '100%' }}>
             <CardHeader title="상세 제어" />
             <CardContent>
@@ -154,50 +184,6 @@ export default function AirControlPage() {
                   {isPending ? '전송 중...' : '명령 전송'}
                 </Button>
               </Stack>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* 마지막 에어컨 제어 기록 */}
-        <Grid item xs={12} md={7}>
-          <Card sx={{ height: '100%' }}>
-            <CardHeader
-              title="마지막 에어컨 제어 기록"
-              action={
-                <Button component={Link} to="/aircon/history" size="small" endIcon={<HistoryIcon />}>
-                  전체 보기
-                </Button>
-              }
-            />
-            <CardContent sx={{ pt: 0 }}>
-              {isHistoryLoading && (
-                <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
-                  <CircularProgress size={24} />
-                </Box>
-              )}
-              {!isHistoryLoading && recentHistory?.data?.length > 0 && (
-                <Stack divider={<Divider flexItem />}>
-                  {recentHistory.data.map((row) => (
-                    <Box
-                      key={row.id}
-                      sx={{ display: 'flex', alignItems: 'center', py: 1.5, gap: 1 }}
-                    >
-                      <Typography variant="body2" sx={{ flexGrow: 1 }}>
-                        {getCommandDescription(row.command)}
-                      </Typography>
-                      <Chip label={row.response || 'N/A'} size="small" sx={{ flexShrink: 0 }} />
-                      <Typography variant="caption" color="text.secondary" sx={{ whiteSpace: 'nowrap', flexShrink: 0 }}>
-                        {dayjs(row.timestamp).format('MM/DD HH:mm')}
-                      </Typography>
-                    </Box>
-                  ))}
-                </Stack>
-              )}
-              {!isHistoryLoading && !recentHistory?.data?.length && (
-                <Typography variant="body2" color="text.secondary" sx={{ py: 2, textAlign: 'center' }}>
-                  기록 없음
-                </Typography>
-              )}
             </CardContent>
           </Card>
         </Grid>
