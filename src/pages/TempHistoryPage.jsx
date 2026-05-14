@@ -22,6 +22,7 @@ import {
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { LineChart } from '@mui/x-charts/LineChart';
 import { useTempHistory, useSeekPage, useTodayTempHistory, useTodayDustHistory } from '../hooks/useApi';
+import { getTempColor, getHumidityColor, getPM1Color, getPM25Color, getPM10Color } from '../utils/colorUtils';
 import dayjs from 'dayjs';
 
 export default function TempHistoryPage() {
@@ -154,13 +155,13 @@ export default function TempHistoryPage() {
                   {data.data.map((row) => (
                     <TableRow hover key={row.id}>
                       <TableCell align="center">{row.id}</TableCell>
-                      <TableCell align="right" sx={{ color: 'primary.main', fontWeight: 'bold' }}>
+                      <TableCell align="right" sx={{ color: getTempColor(row.temperature), fontWeight: 'bold' }}>
                         {row.temperature}
                       </TableCell>
-                      <TableCell align="right" sx={{ color: 'info.main' }}>{row.humidity}</TableCell>
-                      <TableCell align="center" sx={{ color: 'warning.main' }}>{row.pm1_0 ?? '값 없음'}</TableCell>
-                      <TableCell align="center" sx={{ color: 'warning.main' }}>{row.pm2_5 ?? '값 없음'}</TableCell>
-                      <TableCell align="center" sx={{ color: 'warning.main' }}>{row.pm10 ?? '값 없음'}</TableCell>
+                      <TableCell align="right" sx={{ color: getHumidityColor(row.humidity) }}>{row.humidity}</TableCell>
+                      <TableCell align="center" sx={{ color: getPM1Color(row.pm1_0) }}>{row.pm1_0 ?? '값 없음'}</TableCell>
+                      <TableCell align="center" sx={{ color: getPM25Color(row.pm2_5) }}>{row.pm2_5 ?? '값 없음'}</TableCell>
+                      <TableCell align="center" sx={{ color: getPM10Color(row.pm10) }}>{row.pm10 ?? '값 없음'}</TableCell>
                       <TableCell align="right">{dayjs(row.timestamp).format('YY/MM/DD HH:mm')}</TableCell>
                     </TableRow>
                   ))}

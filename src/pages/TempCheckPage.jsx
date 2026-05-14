@@ -4,6 +4,7 @@ import { useSensorData, useDustSensor } from '../hooks/useApi';
 import DeviceThermostatIcon from '@mui/icons-material/DeviceThermostat';
 import WaterDropIcon from '@mui/icons-material/WaterDrop';
 import AirIcon from '@mui/icons-material/Air';
+import { getTempColor, getHumidityColor, getPM1Color, getPM25Color, getPM10Color } from '../utils/colorUtils';
 
 export default function TempCheckPage() {
   const { data, isLoading, isError, error, isFetching } = useSensorData();
@@ -39,15 +40,15 @@ export default function TempCheckPage() {
                     sx={{ my: 3 }}
                   >
                     <Box sx={{ textAlign: 'center' }}>
-                      <DeviceThermostatIcon sx={{ fontSize: 40, color: 'primary.main' }} />
-                      <Typography variant="h3" color="primary.main" sx={{ fontWeight: 700 }}>
+                      <DeviceThermostatIcon sx={{ fontSize: 40, color: getTempColor(data.temperature) }} />
+                      <Typography variant="h3" sx={{ fontWeight: 700, color: getTempColor(data.temperature) }}>
                         {data.temperature}°C
                       </Typography>
                       <Typography variant="overline" color="text.secondary">온도</Typography>
                     </Box>
                     <Box sx={{ textAlign: 'center' }}>
-                      <WaterDropIcon sx={{ fontSize: 40, color: 'info.main' }} />
-                      <Typography variant="h3" color="info.main" sx={{ fontWeight: 700 }}>
+                      <WaterDropIcon sx={{ fontSize: 40, color: getHumidityColor(data.humidity) }} />
+                      <Typography variant="h3" sx={{ fontWeight: 700, color: getHumidityColor(data.humidity) }}>
                         {data.humidity}%
                       </Typography>
                       <Typography variant="overline" color="text.secondary">습도</Typography>
@@ -66,22 +67,22 @@ export default function TempCheckPage() {
                       sx={{ my: 3 }}
                     >
                       <Box sx={{ textAlign: 'center' }}>
-                        <AirIcon sx={{ fontSize: 40, color: 'warning.main' }} />
-                        <Typography variant="h3" color="warning.main" sx={{ fontWeight: 700 }}>
+                        <AirIcon sx={{ fontSize: 40, color: getPM1Color(dustData.data.pm1_0) }} />
+                        <Typography variant="h3" sx={{ fontWeight: 700, color: getPM1Color(dustData.data.pm1_0) }}>
                           {dustData.data.pm1_0}
                         </Typography>
                         <Typography variant="overline" color="text.secondary">PM1.0 μg/m³</Typography>
                       </Box>
                       <Box sx={{ textAlign: 'center' }}>
-                        <AirIcon sx={{ fontSize: 40, color: 'warning.main' }} />
-                        <Typography variant="h3" color="warning.main" sx={{ fontWeight: 700 }}>
+                        <AirIcon sx={{ fontSize: 40, color: getPM25Color(dustData.data.pm2_5) }} />
+                        <Typography variant="h3" sx={{ fontWeight: 700, color: getPM25Color(dustData.data.pm2_5) }}>
                           {dustData.data.pm2_5}
                         </Typography>
                         <Typography variant="overline" color="text.secondary">PM2.5 μg/m³</Typography>
                       </Box>
                       <Box sx={{ textAlign: 'center' }}>
-                        <AirIcon sx={{ fontSize: 40, color: 'warning.main' }} />
-                        <Typography variant="h3" color="warning.main" sx={{ fontWeight: 700 }}>
+                        <AirIcon sx={{ fontSize: 40, color: getPM10Color(dustData.data.pm10) }} />
+                        <Typography variant="h3" sx={{ fontWeight: 700, color: getPM10Color(dustData.data.pm10) }}>
                           {dustData.data.pm10}
                         </Typography>
                         <Typography variant="overline" color="text.secondary">PM10 μg/m³</Typography>

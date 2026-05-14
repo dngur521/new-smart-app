@@ -14,15 +14,13 @@ import {
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import AcUnitIcon from '@mui/icons-material/AcUnit';
 import PowerIcon from '@mui/icons-material/Power';
-import DeviceThermostatIcon from '@mui/icons-material/DeviceThermostat';
-import WaterDropIcon from '@mui/icons-material/WaterDrop';
-import AirIcon from '@mui/icons-material/Air';
 import { LineChart } from '@mui/x-charts/LineChart';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ko';
 import { useAuth } from '../hooks/useAuth';
 import { useSensorData, useAirHistory, useSendCommand, useWeather, useTodayTempHistory, useDustSensor, useTodayDustHistory } from '../hooks/useApi';
 import { getCommandDescription } from '../utils/commandUtils';
+import { getTempColor, getHumidityColor, getPM1Color, getPM25Color, getPM10Color } from '../utils/colorUtils';
 
 export default function HomePage() {
   const { isAuthenticated } = useAuth();
@@ -101,52 +99,49 @@ export default function HomePage() {
 
         {/* 실내 환경 */}
         <Grid item xs={12} md={5}>
-          <Card sx={{ height: '100%' }}>
-            <CardHeader title="실내 환경" />
-            <CardContent>
+          <Card>
+            <CardHeader title="실내 환경" sx={{ pb: 0 }} />
+            <CardContent sx={{ pt: 1 }}>
               {isAuthenticated && sensorData ? (
-                <>
-                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={4} justifyContent="center" alignItems="center" sx={{ my: 1 }}>
-                    <Box sx={{ textAlign: 'center' }}>
-                      <DeviceThermostatIcon sx={{ fontSize: 40, color: 'primary.main' }} />
-                      <Typography variant="h3" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                <Stack direction="row" spacing={0} alignItems="center" justifyContent="center">
+                  {/* 온도/습도 - 세로 배치 */}
+                  <Box sx={{ pr: 2.5 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1, mb: 0.5 }}>
+                      <Typography variant="body2" color="text.secondary" sx={{ minWidth: 28 }}>온도</Typography>
+                      <Typography variant="h5" sx={{ fontWeight: 700, color: getTempColor(sensorData.temperature) }}>
                         {sensorData.temperature}°C
                       </Typography>
-                      <Typography variant="overline" color="text.secondary">온도</Typography>
                     </Box>
-                    <Box sx={{ textAlign: 'center' }}>
-                      <WaterDropIcon sx={{ fontSize: 40, color: 'info.main' }} />
-                      <Typography variant="h3" sx={{ fontWeight: 700, color: 'info.main' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
+                      <Typography variant="body2" color="text.secondary" sx={{ minWidth: 28 }}>습도</Typography>
+                      <Typography variant="h5" sx={{ fontWeight: 700, color: getHumidityColor(sensorData.humidity) }}>
                         {sensorData.humidity}%
                       </Typography>
-                      <Typography variant="overline" color="text.secondary">습도</Typography>
                     </Box>
-                  </Stack>
-                  <Typography variant="subtitle2" color="text.secondary" align="center" sx={{ mt: 1 }}>미세먼지</Typography>
-                  {dustData ? (
-                    <Stack direction="row" spacing={2} justifyContent="center" alignItems="center" sx={{ mt: 1 }}>
-                      <Box sx={{ textAlign: 'center' }}>
-                        <AirIcon sx={{ fontSize: 28, color: 'warning.main' }} />
-                        <Typography variant="h5" sx={{ fontWeight: 700, color: 'warning.main' }}>{dustData.data.pm1_0}</Typography>
-                        <Typography variant="overline" color="text.secondary">PM1.0</Typography>
-                      </Box>
-                      <Box sx={{ textAlign: 'center' }}>
-                        <AirIcon sx={{ fontSize: 28, color: 'warning.main' }} />
-                        <Typography variant="h5" sx={{ fontWeight: 700, color: 'warning.main' }}>{dustData.data.pm2_5}</Typography>
-                        <Typography variant="overline" color="text.secondary">PM2.5</Typography>
-                      </Box>
-                      <Box sx={{ textAlign: 'center' }}>
-                        <AirIcon sx={{ fontSize: 28, color: 'warning.main' }} />
-                        <Typography variant="h5" sx={{ fontWeight: 700, color: 'warning.main' }}>{dustData.data.pm10}</Typography>
-                        <Typography variant="overline" color="text.secondary">PM10</Typography>
-                      </Box>
-                    </Stack>
-                  ) : (
-                    <Typography align="center" color="text.secondary" variant="body2" sx={{ mt: 1 }}>측정 중</Typography>
-                  )}
-                </>
+                  </Box>
+                  {/* 미세먼지 - 오른쪽 */}
+                  <Box sx={{ borderLeft: 1, borderColor: 'divider', pl: 2.5 }}>
+                    {dustData ? (
+                      <>
+                        {[
+                          { label: 'PM1.0', value: dustData.data.pm1_0, colorFn: getPM1Color },
+                          { label: 'PM2.5', value: dustData.data.pm2_5, colorFn: getPM25Color },
+                          { label: 'PM10',  value: dustData.data.pm10,  colorFn: getPM10Color },
+                        ].map(({ label, value, colorFn }) => (
+                          <Box key={label} sx={{ display: 'flex', alignItems: 'baseline', gap: 1, mb: 0.3 }}>
+                            <Typography variant="caption" color="text.secondary" sx={{ minWidth: 36 }}>{label}</Typography>
+                            <Typography variant="h6" sx={{ fontWeight: 700, color: colorFn(value) }}>{value}</Typography>
+                            <Typography variant="caption" color="text.secondary">μg</Typography>
+                          </Box>
+                        ))}
+                      </>
+                    ) : (
+                      <Typography variant="body2" color="text.secondary">측정 중</Typography>
+                    )}
+                  </Box>
+                </Stack>
               ) : (
-                <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
                   {isAuthenticated
                     ? <CircularProgress />
                     : <Typography variant="body2" color="text.secondary">로그인 후 확인 가능합니다.</Typography>
