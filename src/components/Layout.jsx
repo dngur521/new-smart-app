@@ -31,9 +31,14 @@ import PersonIcon from '@mui/icons-material/Person';
 import VideocamIcon from '@mui/icons-material/Videocam';
 import ComputerIcon from '@mui/icons-material/Computer';
 import TerminalIcon from '@mui/icons-material/Terminal';
+import LightModeIcon from '@mui/icons-material/LightMode';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
+import SettingsBrightnessIcon from '@mui/icons-material/SettingsBrightness';
+import { Menu, MenuItem } from '@mui/material';
 
 import { useAuth } from '../hooks/useAuth';
 import { useLogout } from '../hooks/useApi';
+import { useColorMode } from '../context/ThemeContext';
 
 const drawerWidth = 240;
 
@@ -49,13 +54,23 @@ const menuItems = [
   { text: '시스템 콘솔', icon: <TerminalIcon />, path: '/console', requiresAuth: true },
 ];
 
+const themeMenuOptions = [
+  { value: 'light', label: '라이트', icon: <LightModeIcon fontSize="small" /> },
+  { value: 'dark', label: '다크', icon: <DarkModeIcon fontSize="small" /> },
+  { value: 'system', label: '시스템 설정', icon: <SettingsBrightnessIcon fontSize="small" /> },
+];
+
 function Layout({ children }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [themeMenuAnchor, setThemeMenuAnchor] = useState(null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const location = useLocation();
   const { isAuthenticated, user, isLoading } = useAuth();
   const { mutate: logout, isPending: isLoggingOut } = useLogout();
+  const { colorMode, setColorMode } = useColorMode();
+
+  const currentThemeOption = themeMenuOptions.find(o => o.value === colorMode);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -167,6 +182,32 @@ function Layout({ children }) {
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
             Smart Home Dashboard
           </Typography>
+          <Stack direction="row" spacing={1} alignItems="center">
+            <IconButton
+              color="inherit"
+              onClick={(e) => setThemeMenuAnchor(e.currentTarget)}
+              size="small"
+            >
+              {currentThemeOption?.icon}
+            </IconButton>
+            <Menu
+              anchorEl={themeMenuAnchor}
+              open={Boolean(themeMenuAnchor)}
+              onClose={() => setThemeMenuAnchor(null)}
+            >
+              {themeMenuOptions.map((option) => (
+                <MenuItem
+                  key={option.value}
+                  selected={colorMode === option.value}
+                  onClick={() => { setColorMode(option.value); setThemeMenuAnchor(null); }}
+                >
+                  <ListItemIcon>{option.icon}</ListItemIcon>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </Menu>
+          </Stack>
+
           {!isMobile && (
             <Stack direction="row" spacing={2} alignItems="center">
               {isLoading ? (
@@ -219,7 +260,7 @@ function Layout({ children }) {
         variant="permanent"
         sx={{
           display: { xs: 'none', md: 'block' },
-          '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth, borderRight: 'none', backgroundColor: '#fdfdfd' },
+          '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth, borderRight: 'none' },
         }}
         open
       >
