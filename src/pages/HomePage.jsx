@@ -56,8 +56,8 @@ export default function HomePage() {
         <Grid item xs={12} md={7}>
           <Card sx={{ height: '100%' }}>
             <CardContent>
-              <Grid container spacing={2} alignItems="center">
-                <Grid item xs={12} sm={6}>
+              <Grid container spacing={2} alignItems="center" justifyContent="center">
+                <Grid item xs={12} sm={6} sx={{ textAlign: 'center' }}>
                   <Typography variant="h2" sx={{ fontWeight: 700, lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>
                     {now.format('HH:mm:ss')}
                   </Typography>
@@ -65,9 +65,9 @@ export default function HomePage() {
                     {now.locale('ko').format('YYYY년 MM월 DD일 dddd')}
                   </Typography>
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={12} sm={6} sx={{ textAlign: 'center' }}>
                   {weather ? (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1.5 }}>
                       <img
                         src={`https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`}
                         alt={weather.weather[0].description}
