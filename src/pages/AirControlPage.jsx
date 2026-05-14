@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Box,
   Button,
@@ -24,7 +24,7 @@ import SendIcon from '@mui/icons-material/Send';
 import HistoryIcon from '@mui/icons-material/History';
 import { Link } from 'react-router-dom';
 import { useSendCommand, useAirHistory } from '../hooks/useApi';
-import { getCommandIndex, getCommandDescription } from '../utils/commandUtils';
+import { getCommandIndex, getCommandDescription, getCommandSettings } from '../utils/commandUtils';
 import dayjs from 'dayjs';
 
 export default function AirControlPage() {
@@ -34,7 +34,20 @@ export default function AirControlPage() {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   const { mutate: sendCommand, isPending, isError, error } = useSendCommand();
-  const { data: recentHistory, isLoading: isHistoryLoading } = useAirHistory(1, 1);
+  const { data: recentHistory, isLoading: isHistoryLoading } = useAirHistory(1, 5);
+
+  const hasAppliedHistory = useRef(false);
+  useEffect(() => {
+    if (hasAppliedHistory.current || !recentHistory?.data?.length) return;
+    const lastValid = recentHistory.data.find((row) => getCommandSettings(row.command));
+    if (lastValid) {
+      const settings = getCommandSettings(lastValid.command);
+      setType(settings.type);
+      setTemp(settings.temp);
+      setWind(settings.wind);
+      hasAppliedHistory.current = true;
+    }
+  }, [recentHistory]);
 
   const handleCommand = (commandType) => {
     let commandToSend;

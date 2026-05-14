@@ -220,6 +220,17 @@ const codes = [
     { type: 'dehumidification', wind: '자동풍', temp: 30, code: '106' },
 ];
 
+// 'SEND N,5' 형식의 명령어에서 type/temp/wind 설정을 추출 (전원ON/OFF/파워냉방은 null 반환)
+export const getCommandSettings = (command) => {
+    const parts = command.split(' ');
+    if (parts[0] !== 'SEND' || parts.length < 2) return null;
+    const index = parseInt(parts[1].split(',')[0]);
+    if (isNaN(index)) return null;
+    const found = codes.find((c) => c.code === String(index));
+    if (!found || !found.temp) return null;
+    return { type: found.type, temp: found.temp, wind: found.wind };
+};
+
 // (type, temp, wind) 조합으로 아두이노 명령어 코드를 반환
 export const getCommandIndex = (type, temp, wind) => {
     const found = codes.find((c) => c.type === type && c.temp === temp && c.wind === wind);
