@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import {
   Box,
   Button,
+  Card,
+  CardContent,
+  CardHeader,
   Paper,
   Table,
   TableBody,
@@ -16,7 +19,8 @@ import {
   TextField,
 } from '@mui/material';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-import { useTempHistory, useSeekPage } from '../hooks/useApi';
+import { LineChart } from '@mui/x-charts/LineChart';
+import { useTempHistory, useSeekPage, useTodayTempHistory } from '../hooks/useApi';
 import dayjs from 'dayjs';
 
 export default function TempHistoryPage() {
@@ -27,6 +31,8 @@ export default function TempHistoryPage() {
 
   const { data, isLoading, isError, error } = useTempHistory(page + 1, rowsPerPage);
   const { mutate: seekPage, isPending: isSeekPending } = useSeekPage('/arduino/dht-history/seek');
+  const { data: todayTemp } = useTodayTempHistory();
+  const chartData = todayTemp?.data ?? [];
 
   const totalPages = Math.ceil((data?.total || 0) / rowsPerPage);
 
@@ -61,6 +67,33 @@ export default function TempHistoryPage() {
       <Typography variant="h4" gutterBottom>
         온습도 기록
       </Typography>
+
+      {/* 오늘 온도 추이 */}
+      <Card sx={{ mb: 3 }}>
+        <CardHeader title={`오늘 실내 온도 추이 (${dayjs().format('MM/DD')})`} />
+        <CardContent sx={{ pt: 0 }}>
+          {chartData.length > 1 ? (
+            <LineChart
+              xAxis={[{
+                data: chartData.map(r => new Date(r.timestamp)),
+                scaleType: 'time',
+                valueFormatter: (v) => dayjs(v).format('HH:mm'),
+              }]}
+              series={[
+                { data: chartData.map(r => r.temperature), label: '온도 (°C)', color: '#1976d2', showMark: false },
+                { data: chartData.map(r => r.humidity), label: '습도 (%)', color: '#29b6f6', showMark: false },
+              ]}
+              height={200}
+              margin={{ left: 45, right: 20, top: 10, bottom: 30 }}
+            />
+          ) : (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
+              <Typography variant="body2" color="text.secondary">오늘 데이터가 없습니다.</Typography>
+            </Box>
+          )}
+        </CardContent>
+      </Card>
+
       <Paper sx={{ width: '100%', overflow: 'hidden' }}>
         {isLoading && (
           <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>

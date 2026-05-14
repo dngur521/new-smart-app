@@ -3,7 +3,7 @@ import { useAuth } from './useAuth';
 import axios from 'axios';
 
 export const useSensorData = () => {
-    const { authApi } = useAuth();
+    const { authApi, isAuthenticated } = useAuth();
     return useQuery({
         queryKey: ['sensorData'],
         queryFn: async () => {
@@ -13,12 +13,12 @@ export const useSensorData = () => {
         },
         refetchInterval: 5000,
         staleTime: 1000,
-        enabled: !!authApi,
+        enabled: isAuthenticated,
     });
 };
 
 export const useAirHistory = (page, rowsPerPage) => {
-    const { authApi } = useAuth();
+    const { authApi, isAuthenticated } = useAuth();
     return useQuery({
         queryKey: ['airHistory', page, rowsPerPage],
         queryFn: async () => {
@@ -27,7 +27,7 @@ export const useAirHistory = (page, rowsPerPage) => {
             return res.data;
         },
         placeholderData: (previousData) => previousData,
-        enabled: !!authApi,
+        enabled: isAuthenticated,
     });
 };
 
@@ -117,6 +117,38 @@ export const useDeleteUser = () => {
         onSuccess: () => {
             logout();
         },
+    });
+};
+
+export const useWeather = () => {
+    const apiKey = import.meta.env.VITE_WEATHER_API_KEY;
+    const city = import.meta.env.VITE_WEATHER_CITY || 'Seoul';
+    return useQuery({
+        queryKey: ['weather', city],
+        queryFn: async () => {
+            const res = await axios.get('https://api.openweathermap.org/data/2.5/weather', {
+                params: { q: city, appid: apiKey, units: 'metric', lang: 'kr' },
+            });
+            return res.data;
+        },
+        refetchInterval: 10 * 60 * 1000,
+        staleTime: 5 * 60 * 1000,
+        enabled: !!apiKey,
+        retry: 1,
+    });
+};
+
+export const useTodayTempHistory = () => {
+    const { authApi, isAuthenticated } = useAuth();
+    return useQuery({
+        queryKey: ['todayTempHistory'],
+        queryFn: async () => {
+            const res = await authApi.get('/arduino/dht-history/today');
+            if (res.data.status !== 'success') throw new Error(res.data.message || 'Failed to fetch today history');
+            return res.data;
+        },
+        refetchInterval: 5 * 60 * 1000,
+        enabled: isAuthenticated,
     });
 };
 
