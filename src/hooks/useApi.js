@@ -31,17 +31,57 @@ export const useAirHistory = (page, rowsPerPage) => {
     });
 };
 
+const getBucket = (timestamp) => {
+    const d = new Date(timestamp);
+    d.setMinutes(Math.floor(d.getMinutes() / 5) * 5);
+    d.setSeconds(0);
+    d.setMilliseconds(0);
+    return d.getTime();
+};
+
 export const useTempHistory = (page, rowsPerPage) => {
     const { authApi } = useAuth();
     return useQuery({
         queryKey: ['tempHistory', page, rowsPerPage],
         queryFn: async () => {
-            const res = await authApi.get('/arduino/dht-history', { params: { page, limit: rowsPerPage } });
-            if (res.data.status !== 'success') throw new Error(res.data.message || 'Failed to fetch history');
-            return res.data;
+            const [dhtRes, dustRes] = await Promise.all([
+                authApi.get('/arduino/dht-history', { params: { page, limit: rowsPerPage } }),
+                authApi.get('/arduino/dust-history', { params: { page, limit: rowsPerPage } }).catch(() => null),
+            ]);
+            if (dhtRes.data.status !== 'success') throw new Error(dhtRes.data.message || 'Failed to fetch history');
+
+            const dustRows = dustRes?.data?.status === 'success' ? dustRes.data.data : [];
+            const dustMap = new Map();
+            dustRows.forEach(row => {
+                const key = getBucket(row.timestamp);
+                if (!dustMap.has(key)) dustMap.set(key, row);
+            });
+
+            const mergedData = dhtRes.data.data.map(row => {
+                const dust = dustMap.get(getBucket(row.timestamp)) || {};
+                return { ...row, pm1_0: dust.pm1_0 ?? null, pm2_5: dust.pm2_5 ?? null, pm10: dust.pm10 ?? null };
+            });
+
+            return { ...dhtRes.data, data: mergedData };
         },
         placeholderData: (previousData) => previousData,
         enabled: !!authApi,
+    });
+};
+
+export const useDustSensor = () => {
+    const { authApi, isAuthenticated } = useAuth();
+    return useQuery({
+        queryKey: ['dustSensor'],
+        queryFn: async () => {
+            const res = await authApi.get('/arduino/dust-sensor');
+            if (res.data.status !== 'success') throw new Error(res.data.message || 'Failed to fetch dust data');
+            return res.data;
+        },
+        refetchInterval: 5000,
+        staleTime: 1000,
+        enabled: isAuthenticated,
+        retry: 0,
     });
 };
 
@@ -135,6 +175,21 @@ export const useWeather = () => {
         staleTime: 5 * 60 * 1000,
         enabled: !!apiKey,
         retry: 1,
+    });
+};
+
+export const useTodayDustHistory = () => {
+    const { authApi, isAuthenticated } = useAuth();
+    return useQuery({
+        queryKey: ['todayDustHistory'],
+        queryFn: async () => {
+            const res = await authApi.get('/arduino/dust-history/today');
+            if (res.data.status !== 'success') throw new Error(res.data.message || 'Failed to fetch today dust history');
+            return res.data;
+        },
+        refetchInterval: 5 * 60 * 1000,
+        enabled: isAuthenticated,
+        retry: 0,
     });
 };
 

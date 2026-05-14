@@ -16,11 +16,12 @@ import AcUnitIcon from '@mui/icons-material/AcUnit';
 import PowerIcon from '@mui/icons-material/Power';
 import DeviceThermostatIcon from '@mui/icons-material/DeviceThermostat';
 import WaterDropIcon from '@mui/icons-material/WaterDrop';
+import AirIcon from '@mui/icons-material/Air';
 import { LineChart } from '@mui/x-charts/LineChart';
 import dayjs from 'dayjs';
 import 'dayjs/locale/ko';
 import { useAuth } from '../hooks/useAuth';
-import { useSensorData, useAirHistory, useSendCommand, useWeather, useTodayTempHistory } from '../hooks/useApi';
+import { useSensorData, useAirHistory, useSendCommand, useWeather, useTodayTempHistory, useDustSensor, useTodayDustHistory } from '../hooks/useApi';
 import { getCommandDescription } from '../utils/commandUtils';
 
 export default function HomePage() {
@@ -37,10 +38,13 @@ export default function HomePage() {
   const { data: sensorData } = useSensorData();
   const { data: airHistory } = useAirHistory(1, 5);
   const { data: todayTemp } = useTodayTempHistory();
+  const { data: dustData } = useDustSensor();
+  const { data: todayDust } = useTodayDustHistory();
   const { mutate: sendCommand, isPending } = useSendCommand();
 
   const lastAirRecord = airHistory?.data?.[0];
   const chartData = todayTemp?.data ?? [];
+  const dustChartData = todayDust?.data ?? [];
 
   const handleQuickCommand = (cmd) => {
     sendCommand(cmd, { onSuccess: () => setSnackbarOpen(true) });
@@ -95,28 +99,52 @@ export default function HomePage() {
           </Card>
         </Grid>
 
-        {/* 실내 온습도 */}
+        {/* 실내 환경 */}
         <Grid item xs={12} md={5}>
           <Card sx={{ height: '100%' }}>
-            <CardHeader title="실내 온습도" />
+            <CardHeader title="실내 환경" />
             <CardContent>
               {isAuthenticated && sensorData ? (
-                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={4} justifyContent="center" alignItems="center" sx={{ my: 1 }}>
-                  <Box sx={{ textAlign: 'center' }}>
-                    <DeviceThermostatIcon sx={{ fontSize: 40, color: 'primary.main' }} />
-                    <Typography variant="h3" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                      {sensorData.temperature}°C
-                    </Typography>
-                    <Typography variant="overline" color="text.secondary">온도</Typography>
-                  </Box>
-                  <Box sx={{ textAlign: 'center' }}>
-                    <WaterDropIcon sx={{ fontSize: 40, color: 'info.main' }} />
-                    <Typography variant="h3" sx={{ fontWeight: 700, color: 'info.main' }}>
-                      {sensorData.humidity}%
-                    </Typography>
-                    <Typography variant="overline" color="text.secondary">습도</Typography>
-                  </Box>
-                </Stack>
+                <>
+                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={4} justifyContent="center" alignItems="center" sx={{ my: 1 }}>
+                    <Box sx={{ textAlign: 'center' }}>
+                      <DeviceThermostatIcon sx={{ fontSize: 40, color: 'primary.main' }} />
+                      <Typography variant="h3" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                        {sensorData.temperature}°C
+                      </Typography>
+                      <Typography variant="overline" color="text.secondary">온도</Typography>
+                    </Box>
+                    <Box sx={{ textAlign: 'center' }}>
+                      <WaterDropIcon sx={{ fontSize: 40, color: 'info.main' }} />
+                      <Typography variant="h3" sx={{ fontWeight: 700, color: 'info.main' }}>
+                        {sensorData.humidity}%
+                      </Typography>
+                      <Typography variant="overline" color="text.secondary">습도</Typography>
+                    </Box>
+                  </Stack>
+                  <Typography variant="subtitle2" color="text.secondary" align="center" sx={{ mt: 1 }}>미세먼지</Typography>
+                  {dustData ? (
+                    <Stack direction="row" spacing={2} justifyContent="center" alignItems="center" sx={{ mt: 1 }}>
+                      <Box sx={{ textAlign: 'center' }}>
+                        <AirIcon sx={{ fontSize: 28, color: 'warning.main' }} />
+                        <Typography variant="h5" sx={{ fontWeight: 700, color: 'warning.main' }}>{dustData.data.pm1_0}</Typography>
+                        <Typography variant="overline" color="text.secondary">PM1.0</Typography>
+                      </Box>
+                      <Box sx={{ textAlign: 'center' }}>
+                        <AirIcon sx={{ fontSize: 28, color: 'warning.main' }} />
+                        <Typography variant="h5" sx={{ fontWeight: 700, color: 'warning.main' }}>{dustData.data.pm2_5}</Typography>
+                        <Typography variant="overline" color="text.secondary">PM2.5</Typography>
+                      </Box>
+                      <Box sx={{ textAlign: 'center' }}>
+                        <AirIcon sx={{ fontSize: 28, color: 'warning.main' }} />
+                        <Typography variant="h5" sx={{ fontWeight: 700, color: 'warning.main' }}>{dustData.data.pm10}</Typography>
+                        <Typography variant="overline" color="text.secondary">PM10</Typography>
+                      </Box>
+                    </Stack>
+                  ) : (
+                    <Typography align="center" color="text.secondary" variant="body2" sx={{ mt: 1 }}>측정 중</Typography>
+                  )}
+                </>
               ) : (
                 <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
                   {isAuthenticated
@@ -171,36 +199,70 @@ export default function HomePage() {
           </Card>
         </Grid>
 
-        {/* 오늘 온도 추이 */}
+        {/* 오늘 추이 차트 */}
         <Grid item xs={12} md={7}>
-          <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-            <CardHeader title={`오늘 실내 온도 추이 (${now.format('MM/DD')})`} />
-            <CardContent sx={{ pt: 0, flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-              {!isAuthenticated ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-                  <Typography variant="body2" color="text.secondary">로그인 후 확인 가능합니다.</Typography>
-                </Box>
-              ) : chartData.length > 1 ? (
-                <LineChart
-                  xAxis={[{
-                    data: chartData.map(r => new Date(r.timestamp)),
-                    scaleType: 'time',
-                    valueFormatter: (v) => dayjs(v).format('HH:mm'),
-                  }]}
-                  series={[
-                    { data: chartData.map(r => r.temperature), label: '온도 (°C)', color: '#1976d2', showMark: false },
-                    { data: chartData.map(r => r.humidity), label: '습도 (%)', color: '#29b6f6', showMark: false },
-                  ]}
-                  height={220}
-                  margin={{ left: 45, right: 20, top: 10, bottom: 30 }}
-                />
-              ) : (
-                <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-                  <Typography variant="body2" color="text.secondary">오늘 데이터가 없습니다.</Typography>
-                </Box>
-              )}
-            </CardContent>
-          </Card>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6}>
+              <Card sx={{ display: 'flex', flexDirection: 'column' }}>
+                <CardHeader title={`온도·습도 추이 (${now.format('MM/DD')})`} sx={{ pb: 0 }} />
+                <CardContent sx={{ pt: 0, flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                  {!isAuthenticated ? (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
+                      <Typography variant="body2" color="text.secondary">로그인 후 확인 가능합니다.</Typography>
+                    </Box>
+                  ) : chartData.length > 1 ? (
+                    <LineChart
+                      xAxis={[{
+                        data: chartData.map(r => new Date(r.timestamp)),
+                        scaleType: 'time',
+                        valueFormatter: (v) => dayjs(v).format('HH:mm'),
+                      }]}
+                      series={[
+                        { data: chartData.map(r => r.temperature), label: '온도 (°C)', color: '#1976d2', showMark: false },
+                        { data: chartData.map(r => r.humidity), label: '습도 (%)', color: '#29b6f6', showMark: false },
+                      ]}
+                      height={180}
+                      margin={{ left: 45, right: 20, top: 10, bottom: 30 }}
+                    />
+                  ) : (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
+                      <Typography variant="body2" color="text.secondary">오늘 데이터가 없습니다.</Typography>
+                    </Box>
+                  )}
+                </CardContent>
+              </Card>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Card sx={{ display: 'flex', flexDirection: 'column' }}>
+                <CardHeader title={`미세먼지 추이 (${now.format('MM/DD')})`} sx={{ pb: 0 }} />
+                <CardContent sx={{ pt: 0, flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                  {!isAuthenticated ? (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
+                      <Typography variant="body2" color="text.secondary">로그인 후 확인 가능합니다.</Typography>
+                    </Box>
+                  ) : dustChartData.length > 1 ? (
+                    <LineChart
+                      xAxis={[{
+                        data: dustChartData.map(r => new Date(r.timestamp)),
+                        scaleType: 'time',
+                        valueFormatter: (v) => dayjs(v).format('HH:mm'),
+                      }]}
+                      series={[
+                        { data: dustChartData.map(r => r.pm2_5), label: 'PM2.5', color: '#ff9800', showMark: false },
+                        { data: dustChartData.map(r => r.pm10), label: 'PM10', color: '#f44336', showMark: false },
+                      ]}
+                      height={180}
+                      margin={{ left: 45, right: 20, top: 10, bottom: 30 }}
+                    />
+                  ) : (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
+                      <Typography variant="body2" color="text.secondary">오늘 데이터가 없습니다.</Typography>
+                    </Box>
+                  )}
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
         </Grid>
 
       </Grid>

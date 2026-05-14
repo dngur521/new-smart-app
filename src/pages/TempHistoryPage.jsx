@@ -5,6 +5,7 @@ import {
   Card,
   CardContent,
   CardHeader,
+  Grid,
   Paper,
   Table,
   TableBody,
@@ -20,7 +21,7 @@ import {
 } from '@mui/material';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { LineChart } from '@mui/x-charts/LineChart';
-import { useTempHistory, useSeekPage, useTodayTempHistory } from '../hooks/useApi';
+import { useTempHistory, useSeekPage, useTodayTempHistory, useTodayDustHistory } from '../hooks/useApi';
 import dayjs from 'dayjs';
 
 export default function TempHistoryPage() {
@@ -32,7 +33,9 @@ export default function TempHistoryPage() {
   const { data, isLoading, isError, error } = useTempHistory(page + 1, rowsPerPage);
   const { mutate: seekPage, isPending: isSeekPending } = useSeekPage('/arduino/dht-history/seek');
   const { data: todayTemp } = useTodayTempHistory();
+  const { data: todayDust } = useTodayDustHistory();
   const chartData = todayTemp?.data ?? [];
+  const dustChartData = todayDust?.data ?? [];
 
   const totalPages = Math.ceil((data?.total || 0) / rowsPerPage);
 
@@ -68,31 +71,62 @@ export default function TempHistoryPage() {
         온습도 기록
       </Typography>
 
-      {/* 오늘 온도 추이 */}
-      <Card sx={{ mb: 3 }}>
-        <CardHeader title={`오늘 실내 온도 추이 (${dayjs().format('MM/DD')})`} />
-        <CardContent sx={{ pt: 0 }}>
-          {chartData.length > 1 ? (
-            <LineChart
-              xAxis={[{
-                data: chartData.map(r => new Date(r.timestamp)),
-                scaleType: 'time',
-                valueFormatter: (v) => dayjs(v).format('HH:mm'),
-              }]}
-              series={[
-                { data: chartData.map(r => r.temperature), label: '온도 (°C)', color: '#1976d2', showMark: false },
-                { data: chartData.map(r => r.humidity), label: '습도 (%)', color: '#29b6f6', showMark: false },
-              ]}
-              height={200}
-              margin={{ left: 45, right: 20, top: 10, bottom: 30 }}
-            />
-          ) : (
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
-              <Typography variant="body2" color="text.secondary">오늘 데이터가 없습니다.</Typography>
-            </Box>
-          )}
-        </CardContent>
-      </Card>
+      {/* 오늘 추이 차트 */}
+      <Grid container spacing={3} sx={{ mb: 3 }}>
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardHeader title={`온도·습도 추이 (${dayjs().format('MM/DD')})`} sx={{ pb: 0 }} />
+            <CardContent sx={{ pt: 0 }}>
+              {chartData.length > 1 ? (
+                <LineChart
+                  xAxis={[{
+                    data: chartData.map(r => new Date(r.timestamp)),
+                    scaleType: 'time',
+                    valueFormatter: (v) => dayjs(v).format('HH:mm'),
+                  }]}
+                  series={[
+                    { data: chartData.map(r => r.temperature), label: '온도 (°C)', color: '#1976d2', showMark: false },
+                    { data: chartData.map(r => r.humidity), label: '습도 (%)', color: '#29b6f6', showMark: false },
+                  ]}
+                  height={200}
+                  margin={{ left: 45, right: 20, top: 10, bottom: 30 }}
+                />
+              ) : (
+                <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
+                  <Typography variant="body2" color="text.secondary">오늘 데이터가 없습니다.</Typography>
+                </Box>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardHeader title={`미세먼지 추이 (${dayjs().format('MM/DD')})`} sx={{ pb: 0 }} />
+            <CardContent sx={{ pt: 0 }}>
+              {dustChartData.length > 1 ? (
+                <LineChart
+                  xAxis={[{
+                    data: dustChartData.map(r => new Date(r.timestamp)),
+                    scaleType: 'time',
+                    valueFormatter: (v) => dayjs(v).format('HH:mm'),
+                  }]}
+                  series={[
+                    { data: dustChartData.map(r => r.pm1_0), label: 'PM1.0', color: '#4caf50', showMark: false },
+                    { data: dustChartData.map(r => r.pm2_5), label: 'PM2.5', color: '#ff9800', showMark: false },
+                    { data: dustChartData.map(r => r.pm10), label: 'PM10', color: '#f44336', showMark: false },
+                  ]}
+                  height={200}
+                  margin={{ left: 45, right: 20, top: 10, bottom: 30 }}
+                />
+              ) : (
+                <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
+                  <Typography variant="body2" color="text.secondary">오늘 데이터가 없습니다.</Typography>
+                </Box>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
 
       <Paper sx={{ width: '100%', overflow: 'hidden' }}>
         {isLoading && (
@@ -110,6 +144,9 @@ export default function TempHistoryPage() {
                     <TableCell align="center" sx={{ fontWeight: 'bold' }}>#</TableCell>
                     <TableCell align="right" sx={{ fontWeight: 'bold' }}>온도 (°C)</TableCell>
                     <TableCell align="right" sx={{ fontWeight: 'bold' }}>습도 (%)</TableCell>
+                    <TableCell align="center" sx={{ fontWeight: 'bold' }}>PM1.0 (μg/m³)</TableCell>
+                    <TableCell align="center" sx={{ fontWeight: 'bold' }}>PM2.5 (μg/m³)</TableCell>
+                    <TableCell align="center" sx={{ fontWeight: 'bold' }}>PM10 (μg/m³)</TableCell>
                     <TableCell align="right" sx={{ fontWeight: 'bold' }}>시간</TableCell>
                   </TableRow>
                 </TableHead>
@@ -121,6 +158,9 @@ export default function TempHistoryPage() {
                         {row.temperature}
                       </TableCell>
                       <TableCell align="right" sx={{ color: 'info.main' }}>{row.humidity}</TableCell>
+                      <TableCell align="center" sx={{ color: 'warning.main' }}>{row.pm1_0 ?? '값 없음'}</TableCell>
+                      <TableCell align="center" sx={{ color: 'warning.main' }}>{row.pm2_5 ?? '값 없음'}</TableCell>
+                      <TableCell align="center" sx={{ color: 'warning.main' }}>{row.pm10 ?? '값 없음'}</TableCell>
                       <TableCell align="right">{dayjs(row.timestamp).format('YY/MM/DD HH:mm')}</TableCell>
                     </TableRow>
                   ))}

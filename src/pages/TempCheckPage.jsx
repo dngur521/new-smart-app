@@ -1,11 +1,13 @@
 import React from 'react';
 import { Box, Card, CardContent, CircularProgress, Typography, Grid, Alert, Stack } from '@mui/material';
-import { useSensorData } from '../hooks/useApi';
+import { useSensorData, useDustSensor } from '../hooks/useApi';
 import DeviceThermostatIcon from '@mui/icons-material/DeviceThermostat';
 import WaterDropIcon from '@mui/icons-material/WaterDrop';
+import AirIcon from '@mui/icons-material/Air';
 
 export default function TempCheckPage() {
   const { data, isLoading, isError, error, isFetching } = useSensorData();
+  const { data: dustData } = useDustSensor();
 
   return (
     <Box>
@@ -51,6 +53,45 @@ export default function TempCheckPage() {
                       <Typography variant="overline" color="text.secondary">습도</Typography>
                     </Box>
                   </Stack>
+
+                  <Typography variant="h6" color="text.secondary" gutterBottom align="center">
+                    미세먼지
+                  </Typography>
+                  {dustData ? (
+                    <Stack
+                      direction={{ xs: 'column', sm: 'row' }}
+                      spacing={4}
+                      justifyContent="center"
+                      alignItems="center"
+                      sx={{ my: 3 }}
+                    >
+                      <Box sx={{ textAlign: 'center' }}>
+                        <AirIcon sx={{ fontSize: 40, color: 'warning.main' }} />
+                        <Typography variant="h3" color="warning.main" sx={{ fontWeight: 700 }}>
+                          {dustData.data.pm1_0}
+                        </Typography>
+                        <Typography variant="overline" color="text.secondary">PM1.0 μg/m³</Typography>
+                      </Box>
+                      <Box sx={{ textAlign: 'center' }}>
+                        <AirIcon sx={{ fontSize: 40, color: 'warning.main' }} />
+                        <Typography variant="h3" color="warning.main" sx={{ fontWeight: 700 }}>
+                          {dustData.data.pm2_5}
+                        </Typography>
+                        <Typography variant="overline" color="text.secondary">PM2.5 μg/m³</Typography>
+                      </Box>
+                      <Box sx={{ textAlign: 'center' }}>
+                        <AirIcon sx={{ fontSize: 40, color: 'warning.main' }} />
+                        <Typography variant="h3" color="warning.main" sx={{ fontWeight: 700 }}>
+                          {dustData.data.pm10}
+                        </Typography>
+                        <Typography variant="overline" color="text.secondary">PM10 μg/m³</Typography>
+                      </Box>
+                    </Stack>
+                  ) : (
+                    <Typography align="center" color="text.secondary" sx={{ my: 3 }}>
+                      측정 중
+                    </Typography>
+                  )}
                 </>
               )}
             </CardContent>
