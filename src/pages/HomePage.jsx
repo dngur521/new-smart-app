@@ -54,8 +54,8 @@ export default function HomePage() {
 
         {/* 날짜/시간 + 날씨 */}
         <Grid item xs={12} md={7}>
-          <Card sx={{ height: '100%' }}>
-            <CardContent>
+          <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
               <Grid container spacing={2} alignItems="center" justifyContent="center">
                 <Grid item xs={12} sm={6} sx={{ textAlign: 'center' }}>
                   <Typography variant="h2" sx={{ fontWeight: 700, lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>
@@ -175,9 +175,9 @@ export default function HomePage() {
 
         {/* 오늘 온도 추이 */}
         <Grid item xs={12} md={7}>
-          <Card sx={{ height: '100%' }}>
+          <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
             <CardHeader title={`오늘 실내 온도 추이 (${now.format('MM/DD')})`} />
-            <CardContent sx={{ pt: 0 }}>
+            <CardContent sx={{ pt: 0, flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
               {!isAuthenticated ? (
                 <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
                   <Typography variant="body2" color="text.secondary">로그인 후 확인 가능합니다.</Typography>
