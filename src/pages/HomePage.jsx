@@ -6,7 +6,6 @@ import {
   CardContent,
   CardHeader,
   CircularProgress,
-  Divider,
   Grid,
   Snackbar,
   Stack,
@@ -102,21 +101,20 @@ export default function HomePage() {
             <CardHeader title="실내 온습도" />
             <CardContent>
               {isAuthenticated && sensorData ? (
-                <Stack direction="row" justifyContent="space-around" alignItems="center" sx={{ py: 1 }}>
+                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={4} justifyContent="center" alignItems="center" sx={{ my: 1 }}>
                   <Box sx={{ textAlign: 'center' }}>
-                    <DeviceThermostatIcon sx={{ fontSize: 44, color: 'primary.main' }} />
-                    <Typography variant="h4" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                    <DeviceThermostatIcon sx={{ fontSize: 40, color: 'primary.main' }} />
+                    <Typography variant="h3" sx={{ fontWeight: 700, color: 'primary.main' }}>
                       {sensorData.temperature}°C
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">온도</Typography>
+                    <Typography variant="overline" color="text.secondary">온도</Typography>
                   </Box>
-                  <Divider orientation="vertical" flexItem />
                   <Box sx={{ textAlign: 'center' }}>
-                    <WaterDropIcon sx={{ fontSize: 44, color: 'info.main' }} />
-                    <Typography variant="h4" sx={{ fontWeight: 700, color: 'info.main' }}>
+                    <WaterDropIcon sx={{ fontSize: 40, color: 'info.main' }} />
+                    <Typography variant="h3" sx={{ fontWeight: 700, color: 'info.main' }}>
                       {sensorData.humidity}%
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">습도</Typography>
+                    <Typography variant="overline" color="text.secondary">습도</Typography>
                   </Box>
                 </Stack>
               ) : (
