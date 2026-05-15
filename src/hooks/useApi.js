@@ -251,6 +251,16 @@ export const useUpdateCctvConfig = () => {
     });
 };
 
+export const useSendChat = () => {
+    const { authApi } = useAuth();
+    return useMutation({
+        mutationFn: async ({ message, history }) => {
+            const res = await authApi.post('/chat', { message, history });
+            return res.data;
+        },
+    });
+};
+
 const fetchSystemStats = async (authApi) => {
     const res = await authApi.get('/system/stats');
     if (res.status !== 200) throw new Error('Network response was not ok');

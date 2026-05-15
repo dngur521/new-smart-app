@@ -39,6 +39,7 @@ import { Menu, MenuItem } from '@mui/material';
 import { useAuth } from '../hooks/useAuth';
 import { useLogout } from '../hooks/useApi';
 import { useColorMode } from '../context/ThemeContext';
+import ChatBot from './ChatBot';
 
 const drawerWidth = 240;
 
@@ -287,6 +288,7 @@ function Layout({ children }) {
           </Typography>
         </Box>
       </Box>
+      <ChatBot />
     </Box>
   );
 }
