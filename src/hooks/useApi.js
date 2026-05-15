@@ -44,20 +44,25 @@ export const useTempHistory = (page, rowsPerPage) => {
     return useQuery({
         queryKey: ['tempHistory', page, rowsPerPage],
         queryFn: async () => {
-            const [dhtRes, dustRes] = await Promise.all([
-                authApi.get('/arduino/dht-history', { params: { page, limit: rowsPerPage } }),
-                authApi.get('/arduino/dust-history', { params: { page, limit: rowsPerPage } }).catch(() => null),
-            ]);
+            const dhtRes = await authApi.get('/arduino/dht-history', { params: { page, limit: rowsPerPage } });
             if (dhtRes.data.status !== 'success') throw new Error(dhtRes.data.message || 'Failed to fetch history');
 
+            const rows = dhtRes.data.data;
+            if (rows.length === 0) return { ...dhtRes.data, data: [] };
+
+            const from = new Date(new Date(rows[rows.length - 1].timestamp).getTime() - 5 * 60 * 1000).toISOString();
+            const to = new Date(new Date(rows[0].timestamp).getTime() + 5 * 60 * 1000).toISOString();
+
+            const dustRes = await authApi.get('/arduino/dust-history', { params: { from, to } }).catch(() => null);
             const dustRows = dustRes?.data?.status === 'success' ? dustRes.data.data : [];
+
             const dustMap = new Map();
             dustRows.forEach(row => {
                 const key = getBucket(row.timestamp);
                 if (!dustMap.has(key)) dustMap.set(key, row);
             });
 
-            const mergedData = dhtRes.data.data.map(row => {
+            const mergedData = rows.map(row => {
                 const dust = dustMap.get(getBucket(row.timestamp)) || {};
                 return { ...row, pm1_0: dust.pm1_0 ?? null, pm2_5: dust.pm2_5 ?? null, pm10: dust.pm10 ?? null };
             });
