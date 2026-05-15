@@ -7,7 +7,7 @@ const CONSOLE_URL = "/console-ws/";
 export default function SystemConsolePage() {
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>시스템 콘솔 (Pi 2)</Typography>
+      <Typography variant="h4" gutterBottom>시스템 콘솔 (Pi 5)</Typography>
       <Paper sx={{
         overflow: 'hidden',
         height: '75vh',
@@ -16,7 +16,7 @@ export default function SystemConsolePage() {
       }}>
         <iframe
           src={CONSOLE_URL}
-          title="System Console Pi 2"
+          title="System Console Pi 5"
           style={{ width: '100%', height: '100%', border: 'none' }}
         />
       </Paper>

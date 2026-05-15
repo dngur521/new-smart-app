@@ -51,7 +51,7 @@ export default function SystemInfoPage() {
   return (
     <Box>
       <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
-        <Typography variant="h4">시스템 모니터링 (Pi 2)</Typography>
+        <Typography variant="h4">시스템 모니터링 (Pi 5)</Typography>
         {isFetching && !isLoading && <CircularProgress size={24} />}
       </Stack>
 
@@ -82,7 +82,7 @@ export default function SystemInfoPage() {
                 {/* Storage & Network */}
                 <Grid container spacing={3}>
                   <Grid item xs={12} sm={6}>
-                    <Typography variant="h6" gutterBottom>Storage (sda)</Typography>
+                    <Typography variant="h6" gutterBottom>Storage (nvme)</Typography>
                     <LabeledLinearProgress label="사용량" value={data.disk_used_gb} total={data.disk_total_gb} unit="GB" percent={data.disk_percent} />
                     <InfoRow label="온도" value={data.ssd_temp} unit="" />
                     <InfoRow label="Disk Read" value={data.disk_read_mb} unit="MB/s" />
