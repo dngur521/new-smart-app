@@ -1,7 +1,7 @@
 # Smart Home Dashboard — 프론트엔드
 
 라즈베리파이 기반 스마트홈 시스템의 React 웹 대시보드.  
-에어컨 IR 제어, 실시간 온습도·미세먼지 확인, CCTV 스트리밍, 시스템 모니터링을 제공한다.
+에어컨 IR 제어, 실시간 온습도·미세먼지 확인, CCTV 스트리밍, AI 챗봇, 시스템 모니터링을 제공한다.
 
 백엔드: [smart-home-web-server](https://github.com/dngur521/smart-home-web-server) (Flask, 라즈베리파이 5)
 
@@ -12,7 +12,7 @@
 - **React 18** + **Vite**
 - **MUI (Material UI)** — UI 컴포넌트
 - **@mui/x-charts** — LineChart (온습도·미세먼지 추이)
-- **@mui/x-date-pickers** — DateTimePicker (기록 날짜 탐색)
+- **@mui/x-date-pickers** — DateTimePicker (기록 날짜 탐색, 예약 시각 입력)
 - **TanStack Query** — 서버 상태 관리 및 캐싱
 - **Axios** — HTTP 클라이언트 (HttpOnly 쿠키 인증)
 - **React Router v6** — 클라이언트 사이드 라우팅
@@ -64,19 +64,20 @@ cp .env.example .env
 
 ## 페이지 구성
 
-| 경로              | 페이지                 | 인증 필요 |
-| ----------------- | ---------------------- | --------- |
-| `/`               | 홈 대시보드            | ✗ (일부)  |
-| `/auth/login`     | 로그인                 | ✗         |
-| `/auth/register`  | 회원가입               | ✗         |
-| `/aircon/control` | 에어컨 제어            | ✓         |
-| `/aircon/history` | 에어컨 제어 기록       | ✓         |
-| `/temp/check`     | 실시간 온습도·미세먼지 | ✓         |
-| `/temp/history`   | 온습도·미세먼지 기록   | ✓         |
-| `/cctv`           | CCTV 스트리밍          | ✓         |
-| `/system`         | 시스템 모니터링        | ✓         |
-| `/console`        | 시스템 콘솔 (ttyd)     | ✓         |
-| `/user/profile`   | 프로필 / 비밀번호 변경 | ✓         |
+| 경로                | 페이지                 | 인증 필요 |
+| ------------------- | ---------------------- | --------- |
+| `/`                 | 홈 대시보드            | ✗ (일부)  |
+| `/auth/login`       | 로그인                 | ✗         |
+| `/auth/register`    | 회원가입               | ✗         |
+| `/aircon/control`   | 에어컨 제어            | ✓         |
+| `/aircon/schedule`  | 에어컨 예약            | ✓         |
+| `/aircon/history`   | 에어컨 제어 기록       | ✓         |
+| `/temp/check`       | 실시간 온습도·미세먼지 | ✓         |
+| `/temp/history`     | 온습도·미세먼지 기록   | ✓         |
+| `/cctv`             | CCTV 스트리밍          | ✓         |
+| `/system`           | 시스템 모니터링        | ✓         |
+| `/console`          | 시스템 콘솔 (ttyd)     | ✓         |
+| `/user/profile`     | 프로필 / 비밀번호 변경 | ✓         |
 
 ### 홈 대시보드 (`/`)
 
@@ -95,6 +96,17 @@ cp .env.example .env
 - 단축 명령어 (전원 ON/OFF, 파워냉방) 및 상세 제어 (모드·온도·풍량)
 - 페이지 진입 시 마지막 유효 설정값을 드롭다운에 자동 반영
 - 제어 기록 페이지에서 날짜/시간으로 특정 기록 위치로 바로 이동 가능
+
+### 에어컨 예약
+- 켜기(모드·온도·풍량 지정) / 끄기 예약, 1분 단위 시각 설정
+- APScheduler 1분 간격 실행 — 켜기는 전원 ON 후 2초 뒤 온도 설정 순서로 전송
+- 예약 목록 테이블 (상태: 대기중·완료·취소됨)
+- pending 예약 개별 취소 / 취소됨 전체 삭제 / N일 이전 기록 일괄 삭제 (확인 다이얼로그)
+
+### AI 챗봇
+- 우하단 고정 FAB 클릭 시 채팅 패널 표시 (로그인 시에만 노출)
+- 자연어로 에어컨 제어·온도 조회 등 가능 (백엔드: ollama qwen2.5:1.5b)
+- 대화 히스토리 최근 10턴 누적해 문맥 유지, 응답 대기 중 로딩 인디케이터
 
 ### 실시간 온습도·미세먼지
 - DHT22 센서 5초 폴링 (온도·습도)

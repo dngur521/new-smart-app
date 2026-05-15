@@ -3,7 +3,7 @@
 ## 프로젝트 개요
 
 - **프론트**: React 18 + Vite, MUI v5, TanStack Query v5, React Router v6
-- **백엔드**: Flask (라즈베리파이), HttpOnly 쿠키 인증
+- **백엔드**: Flask `app.py`(5000) + `chatbot.py`(5001), 라즈베리파이 5, pm2 운영
 - **통신**: Axios (`withCredentials: true`), `/api` 프록시 경유
 
 ---
