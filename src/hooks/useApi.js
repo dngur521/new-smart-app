@@ -223,6 +223,34 @@ export const useSeekPage = (endpoint) => {
     });
 };
 
+export const useCctvConfig = () => {
+    const { authApi, isAuthenticated } = useAuth();
+    return useQuery({
+        queryKey: ['cctvConfig'],
+        queryFn: async () => {
+            const res = await authApi.get('/system/cctv/config');
+            if (res.data.status !== 'success') throw new Error(res.data.message || 'Failed');
+            return res.data.data;
+        },
+        enabled: isAuthenticated,
+    });
+};
+
+export const useUpdateCctvConfig = () => {
+    const queryClient = useQueryClient();
+    const { authApi } = useAuth();
+    return useMutation({
+        mutationFn: async ({ resolution, fps }) => {
+            const res = await authApi.post('/system/cctv/config', { resolution, fps });
+            if (res.data.status !== 'success') throw new Error(res.data.message || 'Failed');
+            return res.data.data;
+        },
+        onSuccess: (data) => {
+            queryClient.setQueryData(['cctvConfig'], (prev) => prev ? { ...prev, current: data } : prev);
+        },
+    });
+};
+
 const fetchSystemStats = async (authApi) => {
     const res = await authApi.get('/system/stats');
     if (res.status !== 200) throw new Error('Network response was not ok');
