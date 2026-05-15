@@ -3,7 +3,7 @@
 라즈베리파이 기반 스마트홈 시스템의 React 웹 대시보드.  
 에어컨 IR 제어, 실시간 온습도·미세먼지 확인, CCTV 스트리밍, 시스템 모니터링을 제공한다.
 
-백엔드: [smart-home-web-server](https://github.com/dngur521/smart-home-web-server) (Flask, 라즈베리파이 2)
+백엔드: [smart-home-web-server](https://github.com/dngur521/smart-home-web-server) (Flask, 라즈베리파이 5)
 
 ---
 
@@ -102,7 +102,7 @@ cp .env.example .env
 - 수치에 따른 동적 색상 그라데이션 — 한국 환경부 PM 기준 적용
 
 ### 온습도·미세먼지 기록
-- `dht-history`와 `dust-history`를 병렬 조회 후 5분 버킷으로 프론트 병합
+- `dht-history` 조회 후 그 타임스탬프 범위로 `dust-history`를 순차 조회, 5분 버킷으로 프론트 병합
 - 날짜/시간 입력으로 해당 시점 기록 페이지로 바로 이동
 - 오늘 온도·습도 / 미세먼지 추이 차트 상단 표시
 
