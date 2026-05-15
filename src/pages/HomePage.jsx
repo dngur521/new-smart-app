@@ -153,7 +153,7 @@ export default function HomePage() {
         </Grid>
 
         {/* 에어컨 상태 + 빠른 제어 */}
-        <Grid item xs={12} md={5}>
+        <Grid item xs={12} md={2}>
           <Card sx={{ height: '100%' }}>
             <CardHeader title="에어컨" />
             <CardContent>
@@ -194,70 +194,68 @@ export default function HomePage() {
           </Card>
         </Grid>
 
-        {/* 오늘 추이 차트 */}
-        <Grid item xs={12} md={7}>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
-              <Card sx={{ display: 'flex', flexDirection: 'column' }}>
-                <CardHeader title={`온도·습도 추이 (${now.format('MM/DD')})`} sx={{ pb: 0 }} />
-                <CardContent sx={{ pt: 0, flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                  {!isAuthenticated ? (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
-                      <Typography variant="body2" color="text.secondary">로그인 후 확인 가능합니다.</Typography>
-                    </Box>
-                  ) : chartData.length > 1 ? (
-                    <LineChart
-                      xAxis={[{
-                        data: chartData.map(r => new Date(r.timestamp)),
-                        scaleType: 'time',
-                        valueFormatter: (v) => dayjs(v).format('HH:mm'),
-                      }]}
-                      series={[
-                        { data: chartData.map(r => r.temperature), label: '온도 (°C)', color: '#1976d2', showMark: false },
-                        { data: chartData.map(r => r.humidity), label: '습도 (%)', color: '#29b6f6', showMark: false },
-                      ]}
-                      height={180}
-                      margin={{ left: 45, right: 20, top: 10, bottom: 30 }}
-                    />
-                  ) : (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
-                      <Typography variant="body2" color="text.secondary">오늘 데이터가 없습니다.</Typography>
-                    </Box>
-                  )}
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Card sx={{ display: 'flex', flexDirection: 'column' }}>
-                <CardHeader title={`미세먼지 추이 (${now.format('MM/DD')})`} sx={{ pb: 0 }} />
-                <CardContent sx={{ pt: 0, flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                  {!isAuthenticated ? (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
-                      <Typography variant="body2" color="text.secondary">로그인 후 확인 가능합니다.</Typography>
-                    </Box>
-                  ) : dustChartData.length > 1 ? (
-                    <LineChart
-                      xAxis={[{
-                        data: dustChartData.map(r => new Date(r.timestamp)),
-                        scaleType: 'time',
-                        valueFormatter: (v) => dayjs(v).format('HH:mm'),
-                      }]}
-                      series={[
-                        { data: dustChartData.map(r => r.pm2_5), label: 'PM2.5', color: '#ff9800', showMark: false },
-                        { data: dustChartData.map(r => r.pm10), label: 'PM10', color: '#f44336', showMark: false },
-                      ]}
-                      height={180}
-                      margin={{ left: 45, right: 20, top: 10, bottom: 30 }}
-                    />
-                  ) : (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
-                      <Typography variant="body2" color="text.secondary">오늘 데이터가 없습니다.</Typography>
-                    </Box>
-                  )}
-                </CardContent>
-              </Card>
-            </Grid>
-          </Grid>
+        {/* 온도·습도 추이 */}
+        <Grid item xs={12} md={5} sx={{ display: 'flex' }}>
+          <Card sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
+            <CardHeader title={`온도·습도 추이 (${now.format('MM/DD')})`} sx={{ pb: 0 }} />
+            <CardContent sx={{ pt: 0, flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+              {!isAuthenticated ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
+                  <Typography variant="body2" color="text.secondary">로그인 후 확인 가능합니다.</Typography>
+                </Box>
+              ) : chartData.length > 1 ? (
+                <LineChart
+                  xAxis={[{
+                    data: chartData.map(r => new Date(r.timestamp)),
+                    scaleType: 'time',
+                    valueFormatter: (v) => dayjs(v).format('HH:mm'),
+                  }]}
+                  series={[
+                    { data: chartData.map(r => r.temperature), label: '온도 (°C)', color: '#1976d2', showMark: false },
+                    { data: chartData.map(r => r.humidity), label: '습도 (%)', color: '#29b6f6', showMark: false },
+                  ]}
+                  height={180}
+                  margin={{ left: 45, right: 20, top: 10, bottom: 30 }}
+                />
+              ) : (
+                <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
+                  <Typography variant="body2" color="text.secondary">오늘 데이터가 없습니다.</Typography>
+                </Box>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+
+        {/* 미세먼지 추이 */}
+        <Grid item xs={12} md={5} sx={{ display: 'flex' }}>
+          <Card sx={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
+            <CardHeader title={`미세먼지 추이 (${now.format('MM/DD')})`} sx={{ pb: 0 }} />
+            <CardContent sx={{ pt: 0, flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+              {!isAuthenticated ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
+                  <Typography variant="body2" color="text.secondary">로그인 후 확인 가능합니다.</Typography>
+                </Box>
+              ) : dustChartData.length > 1 ? (
+                <LineChart
+                  xAxis={[{
+                    data: dustChartData.map(r => new Date(r.timestamp)),
+                    scaleType: 'time',
+                    valueFormatter: (v) => dayjs(v).format('HH:mm'),
+                  }]}
+                  series={[
+                    { data: dustChartData.map(r => r.pm2_5), label: 'PM2.5', color: '#ff9800', showMark: false },
+                    { data: dustChartData.map(r => r.pm10), label: 'PM10', color: '#f44336', showMark: false },
+                  ]}
+                  height={180}
+                  margin={{ left: 45, right: 20, top: 10, bottom: 30 }}
+                />
+              ) : (
+                <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
+                  <Typography variant="body2" color="text.secondary">오늘 데이터가 없습니다.</Typography>
+                </Box>
+              )}
+            </CardContent>
+          </Card>
         </Grid>
 
       </Grid>
