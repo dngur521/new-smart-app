@@ -23,6 +23,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import HomeIcon from '@mui/icons-material/Home';
 import AcUnitIcon from '@mui/icons-material/AcUnit';
 import HistoryIcon from '@mui/icons-material/History';
+import ScheduleIcon from '@mui/icons-material/Schedule';
 import DeviceThermostatIcon from '@mui/icons-material/DeviceThermostat';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import LoginIcon from '@mui/icons-material/Login';
@@ -47,6 +48,7 @@ const drawerWidth = 240;
 const menuItems = [
   { text: '홈', icon: <HomeIcon />, path: '/', requiresAuth: false },
   { text: '에어컨 제어', icon: <AcUnitIcon />, path: '/aircon/control', requiresAuth: true },
+  { text: '에어컨 예약', icon: <ScheduleIcon />, path: '/aircon/schedule', requiresAuth: true },
   { text: '실시간 온습도', icon: <DeviceThermostatIcon />, path: '/temp/check', requiresAuth: true },
   { text: 'CCTV', icon: <VideocamIcon />, path: '/cctv', requiresAuth: true },
   { text: '제어 기록', icon: <HistoryIcon />, path: '/aircon/history', requiresAuth: true },

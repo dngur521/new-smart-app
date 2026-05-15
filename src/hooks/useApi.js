@@ -251,6 +251,65 @@ export const useUpdateCctvConfig = () => {
     });
 };
 
+export const useAirconSchedules = () => {
+    const { authApi, isAuthenticated } = useAuth();
+    return useQuery({
+        queryKey: ['airconSchedules'],
+        queryFn: async () => {
+            const res = await authApi.get('/schedule/aircon');
+            if (res.data.status !== 'success') throw new Error(res.data.message || 'Failed');
+            return res.data.data;
+        },
+        enabled: isAuthenticated,
+        refetchInterval: 60000,
+    });
+};
+
+export const useCreateAirconSchedule = () => {
+    const queryClient = useQueryClient();
+    const { authApi } = useAuth();
+    return useMutation({
+        mutationFn: async (payload) => {
+            const res = await authApi.post('/schedule/aircon', payload);
+            if (res.data.status !== 'success') throw new Error(res.data.message || 'Failed');
+            return res.data.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['airconSchedules'] });
+        },
+    });
+};
+
+export const useCancelAirconSchedule = () => {
+    const queryClient = useQueryClient();
+    const { authApi } = useAuth();
+    return useMutation({
+        mutationFn: async (id) => {
+            const res = await authApi.delete(`/schedule/aircon/${id}`);
+            if (res.data.status !== 'success') throw new Error(res.data.message || 'Failed');
+            return res.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['airconSchedules'] });
+        },
+    });
+};
+
+export const useDeleteAirconSchedulesBulk = () => {
+    const queryClient = useQueryClient();
+    const { authApi } = useAuth();
+    return useMutation({
+        mutationFn: async (payload) => {
+            const res = await authApi.delete('/schedule/aircon/bulk', { data: payload });
+            if (res.data.status !== 'success') throw new Error(res.data.message || 'Failed');
+            return res.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['airconSchedules'] });
+        },
+    });
+};
+
 export const useSendChat = () => {
     const { authApi } = useAuth();
     return useMutation({

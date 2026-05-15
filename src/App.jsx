@@ -4,6 +4,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import HomePage from './pages/HomePage';
 import AirControlPage from './pages/AirControlPage';
 import AirHistoryPage from './pages/AirHistoryPage';
+import AirconSchedulePage from './pages/AirconSchedulePage';
 import TempCheckPage from './pages/TempCheckPage';
 import TempHistoryPage from './pages/TempHistoryPage';
 import LoginPage from './pages/LoginPage';
@@ -24,6 +25,7 @@ function App() {
 
         <Route path="/aircon/control" element={<ProtectedRoute><AirControlPage /></ProtectedRoute>} />
         <Route path="/aircon/history" element={<ProtectedRoute><AirHistoryPage /></ProtectedRoute>} />
+        <Route path="/aircon/schedule" element={<ProtectedRoute><AirconSchedulePage /></ProtectedRoute>} />
         <Route path="/temp/check" element={<ProtectedRoute><TempCheckPage /></ProtectedRoute>} />
         <Route path="/temp/history" element={<ProtectedRoute><TempHistoryPage /></ProtectedRoute>} />
         <Route path="/user/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
