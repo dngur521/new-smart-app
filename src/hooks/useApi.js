@@ -327,7 +327,7 @@ export const useAirconStatus = () => {
             return { ...results[results.length - 1], is_on: isOn };
         },
         enabled: isAuthenticated,
-        refetchInterval: 2750,
+        refetchInterval: 2500,
         retry: 0,
     });
 };
