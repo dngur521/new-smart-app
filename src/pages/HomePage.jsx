@@ -23,6 +23,18 @@ import AirconStatusBadge from '../components/AirconStatusBadge';
 import { getCommandDescription } from '../utils/commandUtils';
 import { getTempColor, getHumidityColor, getPM1Color, getPM25Color, getPM10Color } from '../utils/colorUtils';
 
+const WEATHER_EMOJI = {
+  '01d': '☀️', '01n': '🌙',
+  '02d': '🌤️', '02n': '🌙',
+  '03d': '⛅', '03n': '☁️',
+  '04d': '☁️', '04n': '☁️',
+  '09d': '🌧️', '09n': '🌧️',
+  '10d': '🌦️', '10n': '🌧️',
+  '11d': '⛈️', '11n': '⛈️',
+  '13d': '❄️', '13n': '❄️',
+  '50d': '🌫️', '50n': '🌫️',
+};
+
 export default function HomePage() {
   const { isAuthenticated } = useAuth();
   const [now, setNow] = useState(dayjs());
@@ -70,17 +82,9 @@ export default function HomePage() {
                 <Grid item xs={12} sm={6} sx={{ textAlign: 'center' }}>
                   {weather ? (
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1.5 }}>
-                      <img
-                        src={`https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`}
-                        alt={weather.weather[0].description}
-                        style={{
-                          width: 64,
-                          height: 64,
-                          filter: weather.weather[0].icon.endsWith('n')
-                            ? 'brightness(0) invert(1) sepia(1) saturate(4) hue-rotate(5deg) brightness(1.1)'
-                            : undefined,
-                        }}
-                      />
+                      <Typography sx={{ fontSize: 56, lineHeight: 1, userSelect: 'none' }}>
+                        {WEATHER_EMOJI[weather.weather[0].icon] ?? '🌡️'}
+                      </Typography>
                       <Box>
                         <Typography variant="h4" sx={{ fontWeight: 700, lineHeight: 1 }}>
                           {Math.round(weather.main.temp)}°C
