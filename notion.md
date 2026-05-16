@@ -28,7 +28,7 @@ CCTV 스트리밍, AI 챗봇을 웹에서 통합 관리한다.
 | 이름 | 역할 | 포트 |
 | --- | --- | --- |
 | `backend` | Flask API 서버 (`app.py`) | 5000 |
-| `chatbot` | AI 챗봇 서버 (`chatbot.py`, ollama qwen2.5:1.5b) | 5001 |
+| `chatbot` | AI 챗봇 서버 (`chatbot.py`, Google Gemini 2.5 Flash) | 5001 |
 | `cctv` | mjpg_streamer (Logitech C270, MJPG 1280x960 30fps) | 8080 |
 | `ttyd` | 웹 콘솔 (`--writable --base-path /console-ws`) | 7681 |
 
@@ -45,7 +45,7 @@ CCTV 스트리밍, AI 챗봇을 웹에서 통합 관리한다.
 - pyserial — 아두이노 시리얼 통신
 - bcrypt / PyJWT — 비밀번호 해싱 및 JWT 인증
 - APScheduler — 에어컨 예약 실행 (매분 cron 트리거)
-- ollama (qwen2.5:1.5b) — 자연어 에어컨 제어·조회 AI 챗봇
+- google-genai (Gemini 2.5 Flash) — 자연어 에어컨 제어·조회 AI 챗봇
 - systemd + pm2로 운영
 
 **프론트엔드**
@@ -73,7 +73,8 @@ CCTV 스트리밍, AI 챗봇을 웹에서 통합 관리한다.
 | 에어컨 제어 | 냉방/제습, 온도(18~30도), 바람 세기(약/중/강/자동) IR 제어 |
 | 단축 명령 | 전원 ON/OFF, 파워냉방 원클릭 |
 | 에어컨 예약 | 켜기(모드·온도·풍량)·끄기 예약, 1분 단위 시각 설정, APScheduler 1분 간격 실행, 예약 목록·취소·일괄 삭제 |
-| AI 챗봇 | 우하단 FAB, ollama qwen2.5:1.5b 기반 자연어 에어컨 제어·온도 조회, 대화 히스토리 10턴 유지 |
+| 에어컨 실시간 상태 | TENT6000 빛센서 기반 켜짐/꺼짐 감지, 에어컨 제어·예약 페이지·홈 대시보드에 초록/빨간 상태 배지, ~5초 자동 폴링 |
+| AI 챗봇 | 우하단 FAB, Google Gemini 2.5 Flash 기반 자연어 에어컨 제어·온도 조회, Python-first fast path (LLM 미호출 최소화), 대화 히스토리 10턴 유지 |
 | 실시간 온습도·미세먼지 | DHT22(온습도), PMS7003(PM1.0·PM2.5·PM10) 5초마다 자동 갱신 |
 | 온습도·미세먼지 기록 | 5분 정각마다 DB 저장, dht-history 조회 후 타임스탬프 범위로 dust-history 순차 조회 후 5분 버킷으로 병합 표시, 날짜/시간으로 특정 기록으로 바로 이동 |
 | 에어컨 제어 기록 | 전송 명령어 및 아두이노 응답 이력, 날짜/시간으로 특정 기록으로 바로 이동 |
@@ -102,17 +103,19 @@ graph TB
         NX_CON["/console/ → ttyd"]
         AUTH["인증 — JWT HttpOnly Cookie / Redis Refresh Token"]
         AIR["에어컨 API — /arduino/send-command / /arduino/aircon-history"]
+        STATUS["에어컨 상태 API — /arduino/aircon-status (TENT6000 빛센서)"]
         SCHEDULE["예약 API — /schedule/aircon (APScheduler 1분 간격)"]
         TEMP["온습도 API — /arduino/dht-sensor / /arduino/dht-history"]
         DUST["미세먼지 API — /arduino/dust-sensor / /arduino/dust-history"]
         CCTV_CFG["CCTV API — /system/cctv/config"]
-        CHATBOT["AI 챗봇 — chatbot.py / ollama qwen2.5:1.5b"]
+        CHATBOT["AI 챗봇 — chatbot.py / Google Gemini 2.5 Flash"]
         DB[("MariaDB")]
         DHT["DHT22 (GPIO 26)"]
     end
 
     subgraph Arduino["Arduino (USB)"]
         IR["IR 송신 — LG IR Protocol"]
+        LIGHT["TENT6000 빛센서 (에어컨 표시등)"]
     end
 
     subgraph Wemos["Wemos D1 (ESP8266)"]
@@ -128,6 +131,7 @@ graph TB
     NX_STATIC --> UI
     NX_API --> AUTH
     NX_API --> AIR
+    NX_API --> STATUS
     NX_API --> SCHEDULE
     NX_API --> TEMP
     NX_API --> DUST
@@ -139,6 +143,7 @@ graph TB
     AUTH --> DB
     AIR --> DB
     AIR -- "Serial: SEND N,5" --> IR
+    STATUS -- "시리얼 조회" --> LIGHT
     SCHEDULE --> DB
     SCHEDULE -- "Serial: SEND N,5" --> IR
     TEMP --> DB
@@ -198,4 +203,3 @@ graph TB
 # 향후 검토 사항
 
 - **HTTPS 배포 시:** 쿠키에 `Secure` 속성 추가 권장
-- **빛 센서 연동:** 에어컨 켜짐 여부를 하드웨어로 감지하는 기능 검토 중
