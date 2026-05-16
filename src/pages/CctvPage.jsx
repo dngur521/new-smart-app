@@ -1,16 +1,21 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import {
   Box,
   CircularProgress,
   FormControl,
   Grid,
+  IconButton,
   InputLabel,
   MenuItem,
   Paper,
   Select,
   Typography,
 } from '@mui/material';
-import { useCctvConfig, useUpdateCctvConfig } from '../hooks/useApi';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import { useCctvConfig, useUpdateCctvConfig, useServoPTZ } from '../hooks/useApi';
 
 const CCTV_STREAM_URL = import.meta.env.VITE_CCTV_STREAM_URL || '/cctv-stream/';
 
@@ -20,6 +25,20 @@ export default function CctvPage() {
 
   const { data: cctvConfig } = useCctvConfig();
   const { mutate: updateConfig } = useUpdateCctvConfig();
+  const { mutate: moveServo } = useServoPTZ();
+  const ptzInterval = useRef(null);
+
+  const startMove = useCallback((direction) => {
+    moveServo(direction);
+    ptzInterval.current = setInterval(() => moveServo(direction), 200);
+  }, [moveServo]);
+
+  const stopMove = useCallback(() => {
+    clearInterval(ptzInterval.current);
+    ptzInterval.current = null;
+  }, []);
+
+  useEffect(() => () => clearInterval(ptzInterval.current), []);
 
   useEffect(() => {
     const img = imgRef.current;
@@ -102,6 +121,38 @@ export default function CctvPage() {
               style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '8px' }}
             />
           </Paper>
+
+          {/* PTZ D-패드 */}
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+            <Box sx={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 48px)',
+              gridTemplateRows: 'repeat(3, 48px)',
+              gap: 0.5,
+            }}>
+              {[
+                { direction: 'up',    icon: <ArrowUpwardIcon />,    col: 2, row: 1 },
+                { direction: 'left',  icon: <ArrowBackIcon />,      col: 1, row: 2 },
+                { direction: 'right', icon: <ArrowForwardIcon />,   col: 3, row: 2 },
+                { direction: 'down',  icon: <ArrowDownwardIcon />,  col: 2, row: 3 },
+              ].map(({ direction, icon, col, row }) => (
+                <Box key={direction} sx={{ gridColumn: col, gridRow: row }}>
+                  <IconButton
+                    variant="contained"
+                    size="medium"
+                    sx={{ width: 48, height: 48, border: 1, borderColor: 'divider' }}
+                    onMouseDown={() => startMove(direction)}
+                    onMouseUp={stopMove}
+                    onMouseLeave={stopMove}
+                    onTouchStart={(e) => { e.preventDefault(); startMove(direction); }}
+                    onTouchEnd={stopMove}
+                  >
+                    {icon}
+                  </IconButton>
+                </Box>
+              ))}
+            </Box>
+          </Box>
         </Grid>
       </Grid>
     </Box>

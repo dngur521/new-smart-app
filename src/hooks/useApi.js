@@ -361,3 +361,11 @@ export const useSystemStats = () => {
         enabled: !!authApi,
     });
 };
+
+export const useServoPTZ = () => {
+    const { authApi } = useAuth();
+    return useMutation({
+        mutationFn: (direction) => authApi.post('/servo/move', { direction }),
+        retry: 0,
+    });
+};
