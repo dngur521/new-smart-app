@@ -15,7 +15,7 @@ CCTV 스트리밍, AI 챗봇을 웹에서 통합 관리한다.
 | 구성 요소 | 역할 |
 | --- | --- |
 | 라즈베리파이 5 | 서버 호스팅 (백엔드 + 프론트 빌드 서빙), Nginx 리버스 프록시, CCTV·ttyd 프록시, DHT22 센서 데이터 수집 |
-| 아두이노 (USB 시리얼) | 에어컨 IR 신호 발신 (`/dev/ttyUSB0`) |
+| 아두이노 (USB 시리얼) | 에어컨 IR 신호 발신 + TENT6000 빛센서 — `/dev/arduino` (udev 심볼릭 링크 고정, `/etc/udev/rules.d/99-arduino.rules`, VID:2341/PID:0043) |
 | Logitech C270 (USB) | CCTV 웹캠 (`/dev/video0`, MJPG 최대 1280x960 30fps) |
 | Wemos D1 (ESP8266) + PMS7003 | WiFi 미세먼지 센서 모듈, 독립 HTTP 서버로 동작 |
 | MariaDB | 온습도 기록, 미세먼지 기록, 에어컨 제어 기록, 예약 기록, 사용자 저장 |
@@ -153,6 +153,21 @@ graph TB
 
     IR -- "IR 신호" --> AC
 ```
+
+---
+
+# 아두이노 시리얼 포트 설정
+
+udev 룰로 `/dev/arduino` 심볼릭 링크를 고정해 USB 재연결·업로드 후 포트 번호가 바뀌는 문제를 해결.
+
+```
+# /etc/udev/rules.d/99-arduino.rules
+SUBSYSTEM=="tty", ATTRS{idVendor}=="2341", ATTRS{idProduct}=="0043", SYMLINK+="arduino"
+```
+
+적용: `sudo udevadm control --reload-rules && sudo udevadm trigger`
+
+`app.py`의 `SERIAL_PORT`는 `/dev/arduino`로 고정.
 
 ---
 
