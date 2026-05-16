@@ -25,14 +25,27 @@ import { getTempColor, getHumidityColor, getPM1Color, getPM25Color, getPM10Color
 
 const WEATHER_EMOJI = {
   '01d': '☀️',  '01n': '🌙',
-  '02d': '🌤️', '02n': '🌙☁️',
-  '03d': '⛅',  '03n': '☁️🌙',
+  '02d': '🌤️',
+  '03d': '⛅',  '03n': '☁️',
   '04d': '☁️',  '04n': '☁️',
   '09d': '🌧️', '09n': '🌧️',
   '10d': '🌦️', '10n': '🌧️',
   '11d': '⛈️', '11n': '⛈️',
   '13d': '❄️',  '13n': '❄️',
   '50d': '🌫️', '50n': '🌫️',
+};
+
+const CloudMoonIcon = () => (
+  <Box sx={{ position: 'relative', width: 68, height: 56, flexShrink: 0 }}>
+    <Typography sx={{ position: 'absolute', bottom: 0, left: 0, fontSize: 36, lineHeight: 1, userSelect: 'none' }}>🌙</Typography>
+    <Typography sx={{ position: 'absolute', top: 0, right: 0, fontSize: 46, lineHeight: 1, userSelect: 'none' }}>☁️</Typography>
+  </Box>
+);
+
+const getWeatherIcon = (iconCode) => {
+  if (iconCode === '02n') return <CloudMoonIcon />;
+  const emoji = WEATHER_EMOJI[iconCode] ?? '🌡️';
+  return <Typography sx={{ fontSize: 56, lineHeight: 1, userSelect: 'none' }}>{emoji}</Typography>;
 };
 
 export default function HomePage() {
@@ -82,9 +95,7 @@ export default function HomePage() {
                 <Grid item xs={12} sm={6} sx={{ textAlign: 'center' }}>
                   {weather ? (
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1.5 }}>
-                      <Typography sx={{ fontSize: (WEATHER_EMOJI[weather.weather[0].icon] ?? '').length > 4 ? 40 : 56, lineHeight: 1, userSelect: 'none' }}>
-                        {WEATHER_EMOJI[weather.weather[0].icon] ?? '🌡️'}
-                      </Typography>
+                      {getWeatherIcon(weather.weather[0].icon)}
                       <Box>
                         <Typography variant="h4" sx={{ fontWeight: 700, lineHeight: 1 }}>
                           {Math.round(weather.main.temp)}°C
