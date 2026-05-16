@@ -24,6 +24,7 @@ import SendIcon from '@mui/icons-material/Send';
 import HistoryIcon from '@mui/icons-material/History';
 import { Link } from 'react-router-dom';
 import { useSendCommand, useAirHistory } from '../hooks/useApi';
+import AirconStatusBadge from '../components/AirconStatusBadge';
 import { getCommandIndex, getCommandDescription, getCommandSettings } from '../utils/commandUtils';
 import dayjs from 'dayjs';
 
@@ -76,9 +77,10 @@ export default function AirControlPage() {
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>
-        에어컨 제어
-      </Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+        <Typography variant="h4">에어컨 제어</Typography>
+        <AirconStatusBadge />
+      </Box>
       <Grid container spacing={3}>
         {/* 마지막 에어컨 제어 기록 */}
         <Grid item xs={12}>

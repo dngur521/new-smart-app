@@ -310,6 +310,28 @@ export const useDeleteAirconSchedulesBulk = () => {
     });
 };
 
+export const useAirconStatus = () => {
+    const { authApi, isAuthenticated } = useAuth();
+    return useQuery({
+        queryKey: ['airconStatus'],
+        queryFn: async () => {
+            const results = [];
+            for (let i = 0; i < 5; i++) {
+                const res = await authApi.get('/arduino/aircon-status');
+                if (res.data.status !== 'success') throw new Error(res.data.message || 'Failed');
+                results.push(res.data);
+                if (i < 4) await new Promise(r => setTimeout(r, 500));
+            }
+            // 5회 중 1회라도 light_value >= threshold면 켜진 것으로 판단
+            const isOn = results.some(r => r.light_value >= r.threshold);
+            return { ...results[results.length - 1], is_on: isOn };
+        },
+        enabled: isAuthenticated,
+        refetchInterval: 2750,
+        retry: 0,
+    });
+};
+
 export const useSendChat = () => {
     const { authApi } = useAuth();
     return useMutation({

@@ -19,6 +19,7 @@ import dayjs from 'dayjs';
 import 'dayjs/locale/ko';
 import { useAuth } from '../hooks/useAuth';
 import { useSensorData, useAirHistory, useSendCommand, useWeather, useTodayTempHistory, useDustSensor, useTodayDustHistory } from '../hooks/useApi';
+import AirconStatusBadge from '../components/AirconStatusBadge';
 import { getCommandDescription } from '../utils/commandUtils';
 import { getTempColor, getHumidityColor, getPM1Color, getPM25Color, getPM10Color } from '../utils/colorUtils';
 
@@ -155,7 +156,10 @@ export default function HomePage() {
         {/* 에어컨 상태 + 빠른 제어 */}
         <Grid item xs={12} md={2}>
           <Card sx={{ height: '100%' }}>
-            <CardHeader title="에어컨" />
+            <CardHeader
+              title="에어컨"
+              action={isAuthenticated ? <Box sx={{ display: 'flex', alignItems: 'center', pt: 0.5, pr: 0.5 }}><AirconStatusBadge /></Box> : null}
+            />
             <CardContent>
               {isAuthenticated ? (
                 <Stack spacing={2}>

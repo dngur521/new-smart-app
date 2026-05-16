@@ -48,6 +48,7 @@ import {
   useCancelAirconSchedule,
   useDeleteAirconSchedulesBulk,
 } from '../hooks/useApi';
+import AirconStatusBadge from '../components/AirconStatusBadge';
 
 const WIND_LABEL = { low: '약풍', mid: '중풍', high: '강풍', auto: '자동풍' };
 const MODE_LABEL = { cool: '냉방', dry: '제습' };
@@ -123,7 +124,10 @@ export default function AirconSchedulePage() {
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>에어컨 예약</Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+        <Typography variant="h4">에어컨 예약</Typography>
+        <AirconStatusBadge />
+      </Box>
 
       <Grid container spacing={3}>
         {/* 예약 등록 폼 */}
