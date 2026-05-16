@@ -24,14 +24,14 @@ import { getCommandDescription } from '../utils/commandUtils';
 import { getTempColor, getHumidityColor, getPM1Color, getPM25Color, getPM10Color } from '../utils/colorUtils';
 
 const WEATHER_EMOJI = {
-  '01d': '☀️', '01n': '🌙',
-  '02d': '🌤️', '02n': '🌙',
-  '03d': '⛅', '03n': '☁️',
-  '04d': '☁️', '04n': '☁️',
+  '01d': '☀️',  '01n': '🌙',
+  '02d': '🌤️', '02n': '🌙☁️',
+  '03d': '⛅',  '03n': '☁️🌙',
+  '04d': '☁️',  '04n': '☁️',
   '09d': '🌧️', '09n': '🌧️',
   '10d': '🌦️', '10n': '🌧️',
   '11d': '⛈️', '11n': '⛈️',
-  '13d': '❄️', '13n': '❄️',
+  '13d': '❄️',  '13n': '❄️',
   '50d': '🌫️', '50n': '🌫️',
 };
 
@@ -82,7 +82,7 @@ export default function HomePage() {
                 <Grid item xs={12} sm={6} sx={{ textAlign: 'center' }}>
                   {weather ? (
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1.5 }}>
-                      <Typography sx={{ fontSize: 56, lineHeight: 1, userSelect: 'none' }}>
+                      <Typography sx={{ fontSize: (WEATHER_EMOJI[weather.weather[0].icon] ?? '').length > 4 ? 40 : 56, lineHeight: 1, userSelect: 'none' }}>
                         {WEATHER_EMOJI[weather.weather[0].icon] ?? '🌡️'}
                       </Typography>
                       <Box>
