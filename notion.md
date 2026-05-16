@@ -15,7 +15,7 @@ CCTV 스트리밍, AI 챗봇을 웹에서 통합 관리한다.
 | 구성 요소 | 역할 |
 | --- | --- |
 | 라즈베리파이 5 | 서버 호스팅 (백엔드 + 프론트 빌드 서빙), Nginx 리버스 프록시, CCTV·ttyd 프록시, DHT22 센서 데이터 수집 |
-| 아두이노 (USB 시리얼) | 에어컨 IR 신호 발신 + TENT6000 빛센서 — `/dev/arduino` (udev 심볼릭 링크 고정, `/etc/udev/rules.d/99-arduino.rules`, VID:2341/PID:0043) |
+| 아두이노 (USB 시리얼) | 에어컨 IR 신호 발신 + TENT6000 빛센서 + PTZ 서보모터 제어 — `/dev/arduino` (udev 심볼릭 링크 고정, `/etc/udev/rules.d/99-arduino.rules`, VID:2341/PID:0043) |
 | Logitech C270 (USB) | CCTV 웹캠 (`/dev/video0`, MJPG 최대 1280x960 30fps) |
 | Wemos D1 (ESP8266) + PMS7003 | WiFi 미세먼지 센서 모듈, 독립 HTTP 서버로 동작 |
 | MariaDB | 온습도 기록, 미세먼지 기록, 에어컨 제어 기록, 예약 기록, 사용자 저장 |
@@ -78,7 +78,7 @@ CCTV 스트리밍, AI 챗봇을 웹에서 통합 관리한다.
 | 실시간 온습도·미세먼지 | DHT22(온습도), PMS7003(PM1.0·PM2.5·PM10) 5초마다 자동 갱신 |
 | 온습도·미세먼지 기록 | 5분 정각마다 DB 저장, dht-history 조회 후 타임스탬프 범위로 dust-history 순차 조회 후 5분 버킷으로 병합 표시, 날짜/시간으로 특정 기록으로 바로 이동 |
 | 에어컨 제어 기록 | 전송 명령어 및 아두이노 응답 이력, 날짜/시간으로 특정 기록으로 바로 이동 |
-| CCTV | Nginx로 프록시한 MJPEG 실시간 스트리밍, 해상도 드롭다운으로 실시간 변경 (mjpg_streamer 재시작 + 스트림 자동 재연결) |
+| CCTV | Nginx로 프록시한 MJPEG 실시간 스트리밍, 해상도 드롭다운으로 실시간 변경 (mjpg_streamer 재시작 + 스트림 자동 재연결), PTZ 서보 D-패드 제어 (상/하/좌/우, 꾹 누르면 200ms 간격 연속 이동) |
 | 시스템 모니터링 | CPU/RAM/Storage(NVMe)/Network 실시간 현황 (3초마다 갱신) |
 | 시스템 콘솔 | ttyd 기반 웹 터미널 |
 | 회원 관리 | 로그인, 회원가입, 비밀번호 변경, 회원 탈퇴 |
@@ -108,6 +108,7 @@ graph TB
         TEMP["온습도 API — /arduino/dht-sensor / /arduino/dht-history"]
         DUST["미세먼지 API — /arduino/dust-sensor / /arduino/dust-history"]
         CCTV_CFG["CCTV API — /system/cctv/config"]
+        PTZ["PTZ API — /servo/move (서보 방향 제어)"]
         CHATBOT["AI 챗봇 — chatbot.py / Google Gemini 2.5 Flash"]
         DB[("MariaDB")]
         DHT["DHT22 (GPIO 26)"]
@@ -116,6 +117,7 @@ graph TB
     subgraph Arduino["Arduino (USB)"]
         IR["IR 송신 — LG IR Protocol"]
         LIGHT["TENT6000 빛센서 (에어컨 표시등)"]
+        SERVO["서보모터 (PTZ — 연속 회전형)"]
     end
 
     subgraph Wemos["Wemos D1 (ESP8266)"]
@@ -136,6 +138,7 @@ graph TB
     NX_API --> TEMP
     NX_API --> DUST
     NX_API --> CCTV_CFG
+    NX_API --> PTZ
     NX_CHAT --> CHATBOT
     NX_CCTV --> CAM
     NX_CON --> TTYD
@@ -151,6 +154,7 @@ graph TB
     DHT -- "5분 주기 수집" --> DB
     DUST -- "5분 주기 HTTP 폴링" --> PMS
 
+    PTZ -- "시리얼 제어" --> SERVO
     IR -- "IR 신호" --> AC
 ```
 
