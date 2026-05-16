@@ -36,9 +36,9 @@ const WEATHER_EMOJI = {
 };
 
 const CloudMoonIcon = () => (
-  <Box sx={{ position: 'relative', width: 50, height: 46, flexShrink: 0 }}>
-    <Typography sx={{ position: 'absolute', top: 0, left: 0, fontSize: 30, lineHeight: 1, userSelect: 'none' }}>🌙</Typography>
-    <Typography sx={{ position: 'absolute', bottom: 0, right: 0, fontSize: 38, lineHeight: 1, userSelect: 'none' }}>☁️</Typography>
+  <Box sx={{ position: 'relative', width: 64, height: 58, flexShrink: 0 }}>
+    <Typography sx={{ position: 'absolute', top: 0, left: 0, fontSize: 36, lineHeight: 1, userSelect: 'none' }}>🌙</Typography>
+    <Typography sx={{ position: 'absolute', bottom: 0, right: 0, fontSize: 56, lineHeight: 1, userSelect: 'none' }}>☁️</Typography>
   </Box>
 );
 
