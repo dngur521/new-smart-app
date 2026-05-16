@@ -73,7 +73,13 @@ export default function HomePage() {
                       <img
                         src={`https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`}
                         alt={weather.weather[0].description}
-                        style={{ width: 64, height: 64 }}
+                        style={{
+                          width: 64,
+                          height: 64,
+                          filter: weather.weather[0].icon.endsWith('n')
+                            ? 'brightness(0) invert(1) sepia(1) saturate(4) hue-rotate(5deg) brightness(1.1)'
+                            : undefined,
+                        }}
                       />
                       <Box>
                         <Typography variant="h4" sx={{ fontWeight: 700, lineHeight: 1 }}>
