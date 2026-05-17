@@ -20,7 +20,7 @@ export default function AirconStatusBadge() {
         flexShrink: 0,
       }} />
       <Typography variant="body2" sx={{ fontWeight: 500, color: isOn ? 'success.main' : 'error.main' }}>
-        {isOn ? '에어컨 켜짐' : '에어컨 꺼짐'}
+        {isOn ? '켜짐' : '꺼짐'}
       </Typography>
     </Box>
   );
