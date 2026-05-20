@@ -212,6 +212,7 @@ SUBSYSTEM=="tty", ATTRS{idVendor}=="2341", ATTRS{idProduct}=="0043", SYMLINK+="a
 → 백엔드: access_token(30분) + refresh_token(7일, Redis 저장)을 HttpOnly 쿠키로 발급
 → 브라우저: 이후 모든 요청에 쿠키 자동 첨부 (withCredentials: true)
 → access_token 만료(401) 시: 인터셉터가 /auth/refresh 자동 호출 + 토큰 로테이션
+  - 동시에 여러 요청이 401을 받으면 첫 번째만 refresh 실행, 나머지는 대기 후 재시도 (경쟁 조건 방지)
 → refresh_token도 만료 시: 로그아웃 처리 후 로그인 페이지로 이동
 ```
 

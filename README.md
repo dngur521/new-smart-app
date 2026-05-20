@@ -140,4 +140,5 @@ cp .env.example .env
 JWT를 **HttpOnly 쿠키**로 관리한다. 백엔드가 로그인 시 `access_token`, `refresh_token`을 쿠키로 발급하며, 브라우저가 이후 요청에 자동으로 첨부한다.
 
 - `access_token` 만료(401) 시 Axios 인터셉터가 자동으로 토큰 갱신 시도
+  - 동시에 여러 요청이 401을 받는 경우 첫 번째 요청만 refresh를 실행하고, 나머지는 대기 후 재시도 (refresh token 로테이션과의 경쟁 조건 방지)
 - `refresh_token`도 만료된 경우 로그아웃 처리 후 로그인 페이지로 이동
