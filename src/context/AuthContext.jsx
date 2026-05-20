@@ -44,17 +44,38 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
+    let isRefreshing = false;
+    let pendingRequests = [];
+
     const responseInterceptor = authApi.interceptors.response.use(
       response => response,
       async (error) => {
         const originalRequest = error.config;
         if (error.response?.status === 401 && !originalRequest._retry) {
           originalRequest._retry = true;
+
+          // 이미 refresh 중이면 완료될 때까지 대기 후 재시도
+          if (isRefreshing) {
+            return new Promise((resolve, reject) => {
+              pendingRequests.push({ resolve, reject });
+            })
+              .then(() => authApi(originalRequest))
+              .catch(err => Promise.reject(err));
+          }
+
+          isRefreshing = true;
           try {
             await refreshAccessToken();
+            pendingRequests.forEach(({ resolve }) => resolve());
+            pendingRequests = [];
+            isRefreshing = false;
             return authApi(originalRequest);
-          } catch {
+          } catch (err) {
+            pendingRequests.forEach(({ reject }) => reject(err));
+            pendingRequests = [];
+            isRefreshing = false;
             logout();
+            return Promise.reject(err);
           }
         }
         return Promise.reject(error);
